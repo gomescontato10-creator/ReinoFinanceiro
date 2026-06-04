@@ -1,1639 +1,1376 @@
+<html>
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finanças do Reino: O Trono da Prosperidade</title>
-    <!-- Tailwind CSS para estilização moderna e responsiva -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fontes do Google (Inter e Cinzel para títulos régios) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;850;900&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome para ícones medievais -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Ably SDK para salvamento na nuvem -->
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap');
+        
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
         }
-        .royal-title {
+        .medieval-font {
             font-family: 'Cinzel', serif;
         }
-        /* Efeitos visuais modernos de sombra e brilho */
-        .glow-card {
-            box-shadow: 0 0 35px rgba(245, 158, 11, 0.12);
+        .glass {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .glow-emerald {
-            box-shadow: 0 0 35px rgba(16, 185, 129, 0.15);
+        .btn-medieval {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .glow-cyan {
-            box-shadow: 0 0 35px rgba(6, 182, 212, 0.15);
+        .btn-medieval::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: 0.5s;
         }
-        .card-transition {
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        .btn-medieval:hover::after {
+            left: 100%;
         }
-        ::-webkit-scrollbar {
-            width: 6px;
+        .glow-green {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
         }
-        ::-webkit-scrollbar-track {
-            background: #020617;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #334155;
+        .glow-red {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
         }
     </style>
 </head>
-<body class="h-full flex flex-col justify-between overflow-x-hidden selection:bg-amber-500 selection:text-slate-900">
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <!-- Tela de Boas-vindas / Escolha do Nome do Reino -->
-    <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 px-4 text-center overflow-y-auto py-8">
-        <div class="max-w-2xl w-full space-y-6">
-            <div class="space-y-3">
-                <span class="text-amber-500 text-xs font-bold uppercase tracking-widest bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/20">Simulador de Decisões e Educação Financeira</span>
-                <h1 class="royal-title text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-650 drop-shadow-lg leading-tight">
+    <!-- EFEITOS SONOROS (WEB AUDIO API) -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } else if (type === 'coins') {
+                const now = audioCtx.currentTime;
+                [293.66, 349.23, 440, 523.25].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(freq, now + i * 0.08);
+                    g.gain.setValueAtTime(0.08, now + i * 0.08);
+                    g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.2);
+                    o.start(now + i * 0.08);
+                    o.stop(now + i * 0.08 + 0.25);
+                });
+            } else if (type === 'upgrade') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.45);
+            } else if (type === 'loss') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.55);
+            }
+        }
+    </script>
+
+    <!-- TELA INICIAL (LOGIN, CADASTRO E NOMEAÇÃO DO REINO) -->
+    <div id="welcome-screen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+        <div class="max-w-xl w-full glass rounded-2xl p-8 border border-amber-500/30 glow-amber relative overflow-hidden flex flex-col gap-6">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+
+            <div class="text-center">
+                <span class="text-xs font-semibold tracking-widest text-amber-500 uppercase">Simulador de Economia Real</span>
+                <h1 class="medieval-font text-3xl md:text-4xl font-bold mt-2 text-white border-b border-slate-800 pb-4">
                     Finanças do Reino
                 </h1>
-                <p class="royal-title text-sm text-slate-400 tracking-widest font-semibold">O Trono da Prosperidade</p>
-            </div>
-            
-            <!-- Formulário de Criação de Personagem/Reino -->
-            <div class="p-6 sm:p-8 bg-slate-900/90 rounded-2xl border border-slate-800 backdrop-blur-md text-left space-y-4 shadow-2xl">
-                <h3 class="royal-title text-base font-bold text-amber-400 border-b border-slate-800 pb-2">Decrete sua Identidade Régia:</h3>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Título e Nome do Monarca</label>
-                        <input id="input-leader-name" type="text" value="Rei Arthur" placeholder="Ex: Rainha Elizabeth" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">Nome do Seu Reino</label>
-                        <input id="input-kingdom-name" type="text" value="Prosperis" placeholder="Ex: El Dorado" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
-                    </div>
-                </div>
-
-                <div class="text-xs text-slate-400 leading-relaxed pt-2 space-y-2">
-                    <p>
-                        👑 <strong>Como Governar:</strong> Você enfrentará súditos com dilemas únicos. Suas escolhas influenciam diretamente seu ouro, felicidade e demografia.
-                    </p>
-                    <p>
-                        📊 <strong>O Segredo da Riqueza:</strong> Compre ativos que geram renda passiva, gerencie a força de trabalho para não perder produtividade, use juros compostos a seu favor no cofre real e evite passivos e empréstimos abusivos.
-                    </p>
-                </div>
-            </div>
-
-            <button onclick="startGame()" class="w-full sm:w-auto px-10 py-4.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl transition duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20 cursor-pointer text-sm uppercase tracking-widest">
-                Coroar e Iniciar
-            </button>
-        </div>
-    </div>
-
-    <!-- Interface Principal do Jogo -->
-    <div id="game-container" class="hidden flex-1 flex flex-col h-full lg:grid lg:grid-cols-12 overflow-hidden">
-        
-        <!-- Área Esquerda/Central: O Trono e os Solicitantes -->
-        <main class="lg:col-span-8 flex flex-col justify-between p-4 sm:p-6 lg:p-8 h-full border-r border-slate-900 bg-gradient-to-b from-slate-950 to-slate-900/40 overflow-y-auto">
-            
-            <!-- Barra de Status Rápida (Dispositivos Móveis / Topo) -->
-            <header class="flex flex-wrap items-center justify-between gap-4 bg-slate-900/80 backdrop-blur border border-slate-800 p-4 rounded-xl shadow-md">
-                <div class="flex items-center gap-3">
-                    <div class="bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/30 text-xl">
-                        👑
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-bold tracking-wide text-amber-400" id="header-leader-title">Rei Arthur</h2>
-                        <span class="text-xs text-slate-400" id="header-kingdom-title">Reino de Prosperis</span>
-                    </div>
-                </div>
-                
-                <!-- Recursos Principais -->
-                <div class="flex gap-4 sm:gap-6">
-                    <div class="text-center" title="Dinheiro livre em caixa para compras e pagamentos">
-                        <span class="text-[10px] text-slate-500 block font-bold uppercase tracking-wider">💰 Ouro Líquido</span>
-                        <span id="stat-gold" class="text-sm sm:text-lg font-extrabold text-amber-450 transition-all duration-300">800</span>
-                    </div>
-                    <div class="text-center" title="População viva do reino (trabalhadores e pagadores de impostos)">
-                        <span class="text-[10px] text-slate-500 block font-bold uppercase tracking-wider">👥 População</span>
-                        <span id="stat-population" class="text-sm sm:text-lg font-extrabold text-cyan-400">100</span>
-                    </div>
-                    <div class="text-center" title="Felicidade Geral (Afeta arrecadação e imigração)">
-                        <span class="text-[10px] text-slate-500 block font-bold uppercase tracking-wider">❤️ Felicidade</span>
-                        <span id="stat-happiness" class="text-sm sm:text-lg font-extrabold text-emerald-450">80%</span>
-                    </div>
-                </div>
-
-                <!-- Botão de Manual de Administração -->
-                <button onclick="openGuideModal()" class="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 border border-slate-850 rounded-lg text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1.5 cursor-pointer shadow-md">
-                    📚 Manual de Finanças
-                </button>
-            </header>
-
-            <!-- Painel Central: A Cadeira do Monarca e o Solicitante Único -->
-            <div class="my-6 lg:my-auto flex flex-col items-center justify-center relative">
-                
-                <!-- Alerta de Evento / Notificação Rápida -->
-                <div id="toast-notification" class="absolute -top-12 opacity-0 transform -translate-y-2 bg-slate-850 text-amber-450 px-4 py-2 rounded-lg text-xs font-semibold border border-amber-500/30 shadow-lg transition-all duration-350 z-10 flex items-center gap-2">
-                    <span>✨</span> <span id="toast-text">Sua majestade assumiu o controle!</span>
-                </div>
-
-                <!-- O Solicitante (Card de Decisão) -->
-                <div id="petitioner-card" class="glow-card card-transition w-full max-w-md bg-slate-900/95 rounded-2xl border border-slate-800 p-6 sm:p-8 flex flex-col justify-between text-center relative overflow-hidden backdrop-blur-md min-h-[440px]">
-                    
-                    <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 via-transparent to-transparent pointer-events-none"></div>
-                    
-                    <!-- Topo do Card -->
-                    <div class="w-full flex justify-between items-center mb-4">
-                        <span id="petitioner-role" class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1 bg-slate-950 rounded-full border border-slate-800/80">
-                            Cortesão
-                        </span>
-                        <span id="cycle-counter" class="text-xs text-amber-500 font-bold bg-amber-500/5 border border-amber-500/10 px-2.5 py-0.5 rounded-full">Ciclo 1</span>
-                    </div>
-
-                    <!-- Corpo Principal: Avatar e Mensagem -->
-                    <div class="space-y-4 my-auto flex flex-col items-center w-full">
-                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-600/20 border-2 border-slate-800 flex items-center justify-center text-4xl shadow-inner relative">
-                            <span id="petitioner-emoji">🧙‍♂️</span>
-                        </div>
-                        
-                        <div class="space-y-2 w-full">
-                            <h3 id="petitioner-name" class="font-bold text-slate-100 text-lg royal-title">Mestre Alquimista</h3>
-                            <p id="petitioner-dialogue" class="text-slate-300 text-sm leading-relaxed px-2 italic min-h-[110px] flex items-center justify-center">
-                                Loading...
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Botões de Decisão (Sim / Não) -->
-                    <div class="w-full grid grid-cols-2 gap-4 mt-6">
-                        <button onclick="handleDecision(false)" class="group py-3 px-4 rounded-xl bg-slate-950 hover:bg-red-950/20 border border-slate-850 hover:border-red-500/40 text-slate-400 hover:text-red-400 font-bold transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95 text-xs uppercase tracking-wider">
-                            <span class="text-red-500 group-hover:scale-110 transition">✘</span> Rejeitar
-                        </button>
-                        <button onclick="handleDecision(true)" class="group py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10 active:scale-95 text-xs uppercase tracking-widest">
-                            Aceitar <span class="text-slate-950 group-hover:scale-110 transition">✔</span>
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Sabedoria do Conselheiro / Lição da Carta -->
-            <footer class="mt-6 bg-slate-900/60 border border-slate-800/80 p-4 rounded-xl flex gap-3.5 items-start">
-                <div class="bg-amber-500/10 p-2.5 rounded-lg text-amber-500 shrink-0 text-xl">
-                    💡
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">Sabedoria do Conselheiro (Educação Financeira)</h4>
-                    <p id="education-tip" class="text-xs text-slate-300 mt-1 leading-relaxed">
-                        A economia do reino prospera quando você investe em ativos de verdade e reduz seus passivos. Pense no retorno a longo prazo!
-                    </p>
-                </div>
-            </footer>
-
-        </main>
-
-        <!-- Área Direita: Painel Financeiro Ativo, Poupança e Abas de Gestão -->
-        <aside class="lg:col-span-4 bg-slate-950 flex flex-col justify-between p-4 sm:p-6 lg:p-8 h-full border-t lg:border-t-0 lg:border-l border-slate-900 overflow-y-auto">
-            <div class="space-y-6">
-                
-                <!-- Título do Painel -->
-                <div class="flex items-center justify-between">
-                    <h3 class="royal-title text-xs font-bold text-slate-400 tracking-wider uppercase">Balanço Patrimonial</h3>
-                    <span class="text-[9px] bg-emerald-500/10 text-emerald-400 font-extrabold px-2.5 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest animate-pulse">Demonstrativo</span>
-                </div>
-
-                <!-- Demonstrativo de Fluxo de Caixa Simulado -->
-                <div class="bg-slate-900/30 border border-slate-900 p-4 rounded-xl space-y-3 shadow-md">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Fluxo Projetado por Ciclo</span>
-                    <div class="space-y-2">
-                        <!-- Renda de Impostos -->
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-400 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Arrecadação Fiscal
-                            </span>
-                            <span id="finance-taxes" class="font-bold text-cyan-400">+50</span>
-                        </div>
-                        <!-- Renda Passiva de Ativos -->
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-400 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Receita de Ativos (Renda Passiva)
-                            </span>
-                            <span id="finance-passive" class="font-bold text-emerald-400">+0</span>
-                        </div>
-                        <!-- Renda de Juros da Poupança do Cofre -->
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-400 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Juros do Cofre (+3%)
-                            </span>
-                            <span id="finance-vault-interest" class="font-bold text-amber-400">+0</span>
-                        </div>
-                        <!-- Custos Fixos de Operação -->
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-400 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Custos Governamentais (OpEx)
-                            </span>
-                            <span id="finance-expenses" class="font-bold text-rose-400">-20</span>
-                        </div>
-                        <!-- Custos de Dívidas -->
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="text-slate-400 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Juros de Empréstimos (Passivos)
-                            </span>
-                            <span id="finance-interest" class="font-bold text-rose-500">0</span>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-slate-900 my-2"></div>
-                    
-                    <!-- Saldo Líquido -->
-                    <div class="flex justify-between items-center text-xs font-bold">
-                        <span class="text-slate-350">Superávit / Déficit Líquido</span>
-                        <span id="finance-net" class="text-emerald-400">+30</span>
-                    </div>
-                </div>
-
-                <!-- COFRE DO TESOURO REAL (Foco em Poupança e Emergências) -->
-                <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">🏦 Cofre de Poupança</span>
-                        <span class="text-[9px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded border border-amber-500/20 font-bold">+3% / ciclo</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-400 block">Reserva de Emergência</span>
-                            <span id="vault-gold-amount" class="text-lg font-black text-amber-400">100</span>
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <button onclick="openVaultModal('deposit')" class="px-3.5 py-1 bg-slate-950 hover:bg-slate-800 border border-slate-850 text-[10px] font-bold rounded-lg text-slate-300 cursor-pointer transition uppercase tracking-wider">Depositar</button>
-                            <button onclick="openVaultModal('withdraw')" class="px-3.5 py-1 bg-slate-950 hover:bg-slate-850 border border-slate-850 text-[10px] font-bold rounded-lg text-slate-300 cursor-pointer transition uppercase tracking-wider">Sacar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Abas Interativas de Administração -->
-                <div class="border-b border-slate-900">
-                    <div class="flex gap-2">
-                        <button onclick="switchTab('assets')" id="tab-btn-assets" class="flex-1 pb-2 border-b-2 border-amber-500 text-amber-500 font-bold text-xs text-center cursor-pointer">Ativos</button>
-                        <button onclick="switchTab('upgrades')" id="tab-btn-upgrades" class="flex-1 pb-2 border-b-2 border-transparent text-slate-400 font-bold text-xs text-center cursor-pointer">Melhorias</button>
-                        <button onclick="switchTab('demo')" id="tab-btn-demo" class="flex-1 pb-2 border-b-2 border-transparent text-slate-400 font-bold text-xs text-center cursor-pointer">Demografia</button>
-                    </div>
-                </div>
-
-                <!-- Aba 1: Ativos Produtivos (Adquirir Ativos de Renda Passiva) -->
-                <div id="tab-content-assets" class="space-y-3">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">🛒 Adquirir Ativos Reais</span>
-                    
-                    <div class="space-y-2">
-                        <!-- Fazendas Agrícolas -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">🌾</span>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-200">Fazendas Agrícolas</p>
-                                    <p class="text-[10px] text-slate-500">Gera: +15g/ciclo <br>Usa: 5 Trabalhadores</p>
-                                </div>
-                            </div>
-                            <button onclick="buyAsset('farm')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg transition cursor-pointer" id="btn-buy-farm">Comprar (150g)</button>
-                        </div>
-
-                        <!-- Rotas Comerciais -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">⛵</span>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-200">Rotas Comerciais</p>
-                                    <p class="text-[10px] text-slate-500">Gera: +40g/ciclo <br>Usa: 2 Trabalhadores</p>
-                                </div>
-                            </div>
-                            <button onclick="buyAsset('route')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg transition cursor-pointer" id="btn-buy-route">Comprar (300g)</button>
-                        </div>
-
-                        <!-- Minas Imperiais -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl">⛏️</span>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-200">Minas Imperiais</p>
-                                    <p class="text-[10px] text-slate-500">Gera: +70g/ciclo <br>Usa: 12 Trabalhadores</p>
-                                </div>
-                            </div>
-                            <button onclick="buyAsset('mine')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg transition cursor-pointer" id="btn-buy-mine">Comprar (400g)</button>
-                        </div>
-                    </div>
-
-                    <!-- Carteira Resumida de Ativos Adquiridos -->
-                    <div class="pt-2 border-t border-slate-900">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Seu Portfólio de Ativos:</span>
-                        <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
-                            <div class="p-2 bg-slate-900/30 border border-slate-900/60 rounded-lg">
-                                <span class="block text-base">🌾</span>
-                                <span class="block text-slate-400">Fazendas</span>
-                                <span id="inventory-farms" class="font-bold text-amber-400">0</span>
-                            </div>
-                            <div class="p-2 bg-slate-900/30 border border-slate-900/60 rounded-lg">
-                                <span class="block text-base">⛵</span>
-                                <span class="block text-slate-400">Rotas</span>
-                                <span id="inventory-routes" class="font-bold text-amber-400">0</span>
-                            </div>
-                            <div class="p-2 bg-slate-900/30 border border-slate-900/60 rounded-lg">
-                                <span class="block text-base">⛏️</span>
-                                <span class="block text-slate-400">Minas</span>
-                                <span id="inventory-mines" class="font-bold text-amber-400">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Aba 2: Melhorias Estruturais (Upgrades Sociais) -->
-                <div id="tab-content-upgrades" class="space-y-3 hidden">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">🏢 Infraestrutura & Mitigação de Risco</span>
-                    
-                    <div class="space-y-2">
-                        <!-- Escola de Ofícios -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div>
-                                <p class="text-xs font-bold text-slate-200">Escola de Ofícios 📖</p>
-                                <p class="text-[10px] text-slate-400">+15% eficiência de todos ativos</p>
-                            </div>
-                            <button id="btn-upgrade-school" onclick="buyUpgrade('school')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg cursor-pointer">Comprar (250g)</button>
-                        </div>
-
-                        <!-- Hospital Real -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div>
-                                <p class="text-xs font-bold text-slate-200">Hospital Real 🏥</p>
-                                <p class="text-[10px] text-slate-400">Protege povo contra pragas letais</p>
-                            </div>
-                            <button id="btn-upgrade-hospital" onclick="buyUpgrade('hospital')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg cursor-pointer">Comprar (350g)</button>
-                        </div>
-
-                        <!-- Posto de Fronteira -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div>
-                                <p class="text-xs font-bold text-slate-200">Posto de Fronteira 🚪</p>
-                                <p class="text-[10px] text-slate-400">Imigração base: +3 servos/ciclo</p>
-                            </div>
-                            <button id="btn-upgrade-border" onclick="buyUpgrade('border')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg cursor-pointer">Comprar (200g)</button>
-                        </div>
-
-                        <!-- Muralhas de Aço -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div>
-                                <p class="text-xs font-bold text-slate-200">Muralhas de Aço 🏰</p>
-                                <p class="text-[10px] text-slate-400">Elimina risco de saques e roubos</p>
-                            </div>
-                            <button id="btn-upgrade-muralha" onclick="buyUpgrade('walls')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg cursor-pointer">Comprar (180g)</button>
-                        </div>
-
-                        <!-- Festival Popular (Consumível) -->
-                        <div class="flex items-center justify-between p-3 bg-slate-900/30 border border-slate-900/60 rounded-xl">
-                            <div>
-                                <p class="text-xs font-bold text-slate-200">Festival Popular 🎉</p>
-                                <p class="text-[10px] text-slate-400">Custo imediato: +20% Felicidade</p>
-                            </div>
-                            <button onclick="buyUpgrade('festival')" class="py-1 px-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[10px] rounded-lg cursor-pointer">Realizar (80g)</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Aba 3: Demografia & Alíquota Fiscal -->
-                <div id="tab-content-demo" class="space-y-3 hidden">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">📊 Súditos & Capacidade de Trabalho</span>
-                    
-                    <!-- Balanço de Trabalhadores -->
-                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-900 text-xs space-y-1.5 shadow-inner">
-                        <div class="flex justify-between text-slate-400">
-                            <span>População Total:</span>
-                            <span id="demo-total-pop" class="font-bold text-slate-100">100</span>
-                        </div>
-                        <div class="flex justify-between text-slate-400">
-                            <span>Mão de Obra Requerida:</span>
-                            <span id="demo-req-workers" class="font-bold text-slate-100">0</span>
-                        </div>
-                        <div class="flex justify-between text-slate-400">
-                            <span>Eficiência do Trabalho:</span>
-                            <span id="demo-work-efficiency" class="font-bold text-emerald-450">100%</span>
-                        </div>
-                    </div>
-
-                    <!-- Configuração da Alíquota Fiscal -->
-                    <div class="space-y-1.5">
-                        <span class="text-[10px] font-bold text-slate-500 uppercase block">⚙️ Definir Alíquota Fiscal (Impostos)</span>
-                        <div class="grid grid-cols-3 gap-1 bg-slate-950 p-1 border border-slate-900 rounded-lg">
-                            <button onclick="setTaxLevel('low')" id="tax-btn-low" class="py-1 text-center text-[11px] rounded bg-slate-900 hover:bg-slate-800 cursor-pointer">Leve (5%)</button>
-                            <button onclick="setTaxLevel('med')" id="tax-btn-med" class="py-1 text-center text-[11px] rounded bg-amber-500 text-slate-950 font-bold cursor-pointer">Média (12%)</button>
-                            <button onclick="setTaxLevel('high')" id="tax-btn-high" class="py-1 text-center text-[11px] rounded bg-slate-900 hover:bg-slate-800 cursor-pointer">Alta (22%)</button>
-                        </div>
-                        <p id="tax-influence-desc" class="text-[10px] text-slate-400 leading-relaxed italic pt-1">
-                            Imposto Médio: Estabiliza a aprovação popular e garante imigração natural e constante.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- CARTEIRA DE PASSIVOS (Dívidas Ativas) -->
-                <div class="space-y-3">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">📜 Dívidas & Passivos Estruturais</span>
-                    <div id="liability-panel" class="p-3 bg-rose-950/10 border border-rose-950/30 rounded-xl flex items-center justify-between shadow-sm">
-                        <div>
-                            <p class="text-xs font-bold text-slate-200">Dívida Soberana</p>
-                            <span id="debt-interest-rate" class="text-[10px] text-rose-450">Juros incidentes: 8% / ciclo</span>
-                        </div>
-                        <div class="text-right">
-                            <span id="debt-amount" class="text-xs font-bold text-rose-400 block">0</span>
-                            <button id="pay-debt-btn" onclick="payDebt()" class="hidden mt-1 text-[9px] bg-rose-500 hover:bg-rose-600 text-slate-950 font-extrabold px-2 py-0.5 rounded cursor-pointer transition">Quitar</button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Botão de Reinício de Dinastia -->
-            <div class="mt-8 border-t border-slate-900 pt-4">
-                <button onclick="openConfirmModal()" class="w-full py-2 px-4 rounded-lg bg-slate-900 hover:bg-slate-850 border border-slate-800 text-xs text-slate-400 hover:text-slate-300 font-bold uppercase tracking-wider transition cursor-pointer">
-                    Reiniciar Reinado
-                </button>
-            </div>
-        </aside>
-
-    </div>
-
-    <!-- Modal de Guia de Administração e Educação Financeira -->
-    <div id="guide-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
-        <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 flex flex-col max-h-[85vh] shadow-2xl">
-            <div class="text-center">
-                <span class="text-4xl">📚</span>
-                <h3 class="royal-title text-xl font-bold text-amber-400 mt-2">Manual Financeiro de Economia de Estado</h3>
-                <p class="text-xs text-slate-400">Domine conceitos essenciais para governar e evitar a insolvência total.</p>
-            </div>
-
-            <!-- Abas do Guia -->
-            <div class="border-b border-slate-800">
-                <div class="flex gap-2 overflow-x-auto pb-1">
-                    <button onclick="switchGuideTab('g-basics')" id="g-tab-basics" class="pb-1 px-3 border-b-2 border-amber-500 text-amber-500 font-bold text-xs shrink-0 cursor-pointer">Balanço do Reino</button>
-                    <button onclick="switchGuideTab('g-assets')" id="g-tab-assets" class="pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer">Ativos vs Passivos</button>
-                    <button onclick="switchGuideTab('g-comp')" id="g-tab-comp" class="pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer">Juros Compostos</button>
-                    <button onclick="switchGuideTab('g-risk')" id="g-tab-risk" class="pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer">Custos de Risco</button>
-                </div>
-            </div>
-
-            <!-- Conteúdo das Abas do Guia -->
-            <div class="flex-1 overflow-y-auto text-sm text-slate-300 space-y-4 pr-1">
-                <!-- Seção: Básicos -->
-                <div id="g-content-basics" class="space-y-3">
-                    <h4 class="font-bold text-amber-400">📊 O Balanço Geral</h4>
-                    <p class="leading-relaxed text-xs">
-                        A economia do seu reino se sustenta sobre três pernas de uma mesma mesa: o <strong>Ouro Líquido</strong> (liquidez rápida), a <strong>População</strong> (capital humano) e a <strong>Felicidade</strong> (multiplicador de cooperação e atração migratória).
-                    </p>
-                    <p class="leading-relaxed text-xs">
-                        Tributos sufocantes destroem a aprovação dos servos, gerando êxodo demográfico agressivo e matando as frentes de trabalho. Tributos de menos dão felicidade ao povo, mas impedem o Tesouro Real de obter liquidez e capitalizar em infraestrutura. Busque o ponto de equilíbrio!
-                    </p>
-                </div>
-
-                <!-- Seção: Ativos e Passivos -->
-                <div id="g-content-assets" class="space-y-3 hidden">
-                    <h4 class="font-bold text-amber-400">🌾 Entendendo Ativos e Passivos</h4>
-                    <p class="leading-relaxed text-xs">
-                        <strong>Ativos de Renda Passiva</strong> são as Fazendas, Rotas e Minas. Eles produzem moedas a cada ciclo de forma contínua, sem demandar transações. Eles expandem o seu fluxo de caixa diário.
-                    </p>
-                    <p class="leading-relaxed text-xs">
-                        <strong>Passivos Financeiros</strong> consistem em tudo aquilo que extrai recursos do seu tesouro sem gerar riquezas futuras de produção. O maior exemplo são os empréstimos: tomar ouro imediato para gastos supérfluos cria uma taxa de endividamento altíssima que consome a margem de lucro de seus ativos e pode arruinar o reino de forma irreversível.
-                    </p>
-                </div>
-
-                <!-- Seção: Juros Compostos -->
-                <div id="g-content-comp" class="space-y-3 hidden">
-                    <h4 class="font-bold text-amber-400">📈 A Alquimia dos Juros Compostos</h4>
-                    <p class="leading-relaxed text-xs">
-                        Ao poupar moedas no seu **Cofre Real**, você ativa a geração de **3% de juros ao ciclo**. Isso representa investimentos em Renda Fixa ou Títulos Públicos de baixo risco. A cada encerramento de turno, o valor acumulado rende mais ouro, e no ciclo seguinte você ganha juros sobre os juros anteriores!
-                    </p>
-                    <p class="leading-relaxed text-xs">
-                        Contudo, os juros atuam em via de mão dupla. Se você assumir dívidas, a taxa passiva de **8% ao ciclo** agirá de forma exponencial contra você. Se as dívidas não forem liquidadas, os juros compostos devedores consumirão o caixa do reino em poucos turnos.
-                    </p>
-                </div>
-
-                <!-- Seção: Riscos -->
-                <div id="g-content-risk" class="space-y-3 hidden">
-                    <h4 class="font-bold text-amber-400">🛡️ Protegendo e Mitigando Riscos</h4>
-                    <p class="leading-relaxed text-xs">
-                        O acúmulo de patrimônio atrai ameaças sistêmicas imprevistas. Na governança e no planejamento de vida, ignorar riscos catastróficos é a principal causa de falências repentinas. 
-                    </p>
-                    <ul class="list-disc pl-5 text-xs space-y-1 text-slate-400">
-                        <li><strong>Inundações e secas</strong> podem arruinar safras das fazendas (mitigável com contratação de apólices e seguros).</li>
-                        <li><strong>Incursões de saques e pilhagens</strong> subtraem ouro do caixa líquido (mitigável construindo Muralhas de Aço).</li>
-                        <li><strong>Epidemias de pragas</strong> causam mortalidade em massa na força de trabalho (mitigável estruturando Hospitais).</li>
-                    </ul>
-                </div>
-            </div>
-
-            <button onclick="closeGuideModal()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer">
-                Retornar ao Governo
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal do Cofre Real (Transações de Reserva de Emergência) -->
-    <div id="vault-modal" class="fixed inset-0 z-40 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
-        <div class="w-full max-w-sm bg-slate-900 border border-amber-550/20 rounded-2xl p-6 space-y-4 shadow-2xl">
-            <div class="text-center">
-                <span class="text-3xl">🏦</span>
-                <h3 class="royal-title text-lg font-bold text-amber-400 mt-1" id="vault-modal-title">Cofre Imperial</h3>
-                <p class="text-xs text-slate-400">Transfira moedas para a poupança do reino</p>
-            </div>
-
-            <div class="space-y-3">
-                <div class="flex justify-between text-xs">
-                    <span class="text-slate-400">Em Caixa: <strong id="vault-modal-cash" class="text-slate-200">0</strong></span>
-                    <span class="text-slate-400">No Cofre: <strong id="vault-modal-savings" class="text-amber-450">0</strong></span>
-                </div>
-                <input id="vault-input-amount" type="number" min="1" placeholder="Ex: 100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-lg font-bold text-amber-400 focus:outline-none focus:border-amber-550 transition">
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="closeVaultModal()" class="py-2.5 bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-450 text-xs font-bold uppercase tracking-wider cursor-pointer">Cancelar</button>
-                <button id="vault-action-btn" class="py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmação de Reinício -->
-    <div id="confirm-modal" class="fixed inset-0 z-45 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
-        <div class="w-full max-w-xs bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 text-center shadow-2xl">
-            <span class="text-2xl">⚠️</span>
-            <h4 class="royal-title text-sm font-bold text-amber-500 uppercase tracking-wider">Reiniciar Dinastia?</h4>
-            <p class="text-xs text-slate-300 leading-relaxed">Você abdicará de todo o progresso atual para refundar o seu reino do absoluto zero.</p>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="closeConfirmModal()" class="py-2 bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded-lg text-slate-400 text-xs font-bold uppercase cursor-pointer">Cancelar</button>
-                <button onclick="confirmRestart()" class="py-2 bg-rose-500 hover:bg-rose-600 text-slate-950 font-black rounded-lg text-xs uppercase cursor-pointer">Confirmar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Relatório Financeiro de Fechamento de Turno -->
-    <div id="report-modal" class="fixed inset-0 z-40 hidden flex items-center justify-center bg-slate-950/95 backdrop-blur-sm p-4">
-        <div class="glow-emerald w-full max-w-md bg-slate-900 border border-emerald-500/20 rounded-2xl p-6 space-y-5 shadow-2xl">
-            <div class="text-center space-y-1">
-                <span class="text-2xl">📊</span>
-                <h3 class="royal-title text-lg font-bold text-emerald-450">Fechamento do Ciclo</h3>
-                <p class="text-xs text-slate-400" id="report-turn">Auditoria geral de contas</p>
-            </div>
-
-            <!-- Dados do Fechamento -->
-            <div class="bg-slate-950/80 p-4 rounded-xl space-y-3 border border-slate-800/80 text-xs">
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Arrecadação de Impostos:</span>
-                    <span class="font-bold text-cyan-400" id="report-taxes">+0</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Rendimento de Ativos:</span>
-                    <span class="font-bold text-emerald-400" id="report-assets">+0</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Rendimento do Cofre (Poupança):</span>
-                    <span class="font-bold text-amber-400" id="report-vault-yield">+0</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Custos Administrativos (OpEx):</span>
-                    <span class="font-bold text-rose-400" id="report-expenses">-0</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Juros de Empréstimos (Passivos):</span>
-                    <span class="font-bold text-rose-500" id="report-interest">0</span>
-                </div>
-                <div class="border-t border-slate-800 my-2"></div>
-                <div class="flex justify-between text-sm font-bold">
-                    <span class="text-slate-200">Saldo Consolidado:</span>
-                    <span id="report-net" class="text-emerald-400">+0</span>
-                </div>
-            </div>
-
-            <!-- Comentário do Conselheiro -->
-            <div class="p-3.5 bg-amber-500/5 border border-amber-500/10 rounded-xl flex gap-3 items-start">
-                <span class="text-lg">🧑‍💼</span>
-                <div>
-                    <h5 class="text-xs font-bold text-amber-400">Parecer de Gestão</h5>
-                    <p id="report-tip" class="text-xs text-slate-300 mt-0.5 leading-relaxed">
-                        Seus ativos mantêm a liquidez constante do reino. Continue alocando capital de forma eficiente.
-                    </p>
-                </div>
-            </div>
-
-            <button onclick="closeReportModal()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl transition cursor-pointer text-xs uppercase tracking-widest">
-                Prosseguir com o Reinado
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal de Fim de Jogo (Insolvência ou Revolta) -->
-    <div id="game-over-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950 p-4 overflow-y-auto">
-        <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 text-center my-8 shadow-2xl">
-            <span id="game-over-icon" class="text-5xl">💀</span>
-            
-            <div class="space-y-2">
-                <h2 id="game-over-title" class="royal-title text-2xl sm:text-3xl font-black text-amber-500">A Queda da Dinastia</h2>
-                <p id="game-over-subtitle" class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Auditoria de Insolvência e Ruína Geral</p>
-            </div>
-
-            <!-- Rank -->
-            <div class="py-2.5 px-6 bg-slate-950 inline-block rounded-full border border-slate-800 shadow-inner">
-                <span class="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest block">Classificação de Monarca</span>
-                <span id="game-over-rank" class="text-lg font-black text-amber-400 tracking-wide">Insolvente</span>
-            </div>
-
-            <!-- Estatísticas Finais -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                    <span class="text-[9px] text-slate-500 uppercase block font-bold">Ciclos Governados</span>
-                    <span id="end-cycles" class="text-xs font-black text-amber-400">1</span>
-                </div>
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                    <span class="text-[9px] text-slate-500 uppercase block font-bold">Guardado no Cofre</span>
-                    <span id="end-vault" class="text-xs font-black text-cyan-400">0</span>
-                </div>
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                    <span class="text-[9px] text-slate-500 uppercase block font-bold">Dívidas Soberanas</span>
-                    <span id="end-debt" class="text-xs font-black text-rose-500">0</span>
-                </div>
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                    <span class="text-[9px] text-slate-500 uppercase block font-bold">Súditos Finais</span>
-                    <span id="end-pop" class="text-xs font-black text-emerald-450">100</span>
-                </div>
-            </div>
-
-            <!-- Feedback Educativo Customizado -->
-            <div class="p-4 bg-slate-950 rounded-xl border border-slate-850 text-left space-y-2">
-                <h4 class="text-xs font-bold text-amber-550 uppercase tracking-wider">Laudo de Aprendizado Econômico:</h4>
-                <p id="game-over-feedback" class="text-xs sm:text-sm text-slate-300 leading-relaxed italic font-light">
-                    O reino ruiu devido ao acúmulo desastroso de passivos e descontrole inflacionário.
+                <p class="text-slate-400 text-sm mt-3">
+                    Governe seu feudo, controle sua demografia, invista ativamente na economia e proteja seu tesouro. Seus dados são salvos constantemente na nuvem Ably.
                 </p>
             </div>
 
-            <button onclick="restartGame()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl transition duration-200 shadow-md uppercase tracking-widest text-xs">
-                Restaurar a Coroa
+            <!-- Formulário de Login / Novo Reino -->
+            <form id="start-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Seu Título / Nome</label>
+                        <input type="text" id="input-king" placeholder="Ex: Rei Arthur" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Nome do Reino</label>
+                        <input type="text" id="input-kingdom" placeholder="Ex: Camelot" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4">
+                    <span class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Credenciais de Nuvem (Salvar Progresso)</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <input type="text" id="cloud-username" placeholder="Usuário (ex: arthur99)" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                        <div>
+                            <input type="password" id="cloud-password" placeholder="Senha do Reino" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">
+                        *Se este usuário já possuir um reino salvo na nuvem Ably, ele será restaurado automaticamente, ignorando os campos de nome acima.
+                    </p>
+                </div>
+
+                <button type="submit" id="btn-start" class="w-full btn-medieval bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-lg border border-amber-400/20 shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <i class="fa-solid fa-crown text-amber-300"></i> Entrar / Iniciar Reino
+                </button>
+            </form>
+            
+            <div id="login-status" class="text-center text-xs text-slate-400 hidden">
+                <i class="fa-solid fa-spinner animate-spin text-amber-500 mr-2"></i> Conectando à nuvem e buscando dados...
+            </div>
+        </div>
+    </div>
+
+    <!-- CABEÇALHO -->
+    <header class="bg-slate-900/90 border-b border-slate-800 px-4 py-3 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-center text-amber-500 text-xl shadow-inner">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h2 class="medieval-font font-bold text-lg leading-tight" id="lbl-kingdom-name">Carregando...</h2>
+                    <p class="text-xs text-slate-400" id="lbl-king-name">Governo de...</p>
+                </div>
+            </div>
+
+            <!-- Indicadores Rápidos -->
+            <div class="flex flex-wrap items-center gap-4 text-xs md:text-sm">
+                <div class="bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-amber-400"></i>
+                    <span>Caixa Líquido: <strong class="text-amber-400" id="header-gold">1.000 moedas</strong></span>
+                </div>
+                <div class="bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-users text-blue-400"></i>
+                    <span>Cidadãos: <strong class="text-blue-400" id="header-pop">150</strong></span>
+                </div>
+                <div class="bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-green-400 animate-pulse" id="cloud-indicator" title="Sincronizado na Nuvem Ably"></i>
+                    <span class="text-slate-400 text-[11px]" id="cloud-status">Nuvem Conectada</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+        
+        <!-- PAINEL DA ESQUERDA: CARTA DE DECISÃO -->
+        <div class="lg:col-span-7 flex flex-col justify-between gap-6">
+            
+            <!-- Tab de Navegação Rápida (Jogo / Guia Financeiro) -->
+            <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
+                <button onclick="switchTab('game')" id="tab-btn-game" class="flex-1 py-2 rounded-md font-semibold text-xs uppercase tracking-wider text-amber-400 bg-slate-950 border border-amber-500/20">
+                    <i class="fa-solid fa-crown mr-2"></i> Trono do Reino
+                </button>
+                <button onclick="switchTab('guide')" id="tab-btn-guide" class="flex-1 py-2 rounded-md font-semibold text-xs uppercase tracking-wider text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-book-open mr-2"></i> Guia Financeiro do Monarca
+                </button>
+            </div>
+
+            <!-- ÁREA DO JOGO -->
+            <div id="tab-game" class="flex-grow flex flex-col justify-between gap-6">
+                <!-- Visor da Proposta do Personagem -->
+                <div class="glass rounded-2xl border border-slate-800 p-6 flex flex-col justify-between min-h-[380px] relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 p-4">
+                        <span class="bg-slate-900 border border-slate-800 text-slate-400 px-3 py-1 rounded-full text-xs font-semibold" id="lbl-cycle">
+                            Turno 1
+                        </span>
+                    </div>
+
+                    <!-- Conteúdo do Evento -->
+                    <div class="my-auto space-y-6" id="card-content">
+                        <!-- Personagem e Categoria -->
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-slate-800 rounded-xl border border-amber-500/30 flex items-center justify-center text-3xl shadow-inner" id="char-avatar">
+                                🧙‍♂️
+                            </div>
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-amber-400 font-bold" id="event-tag">Conselheiro Real</span>
+                                <h3 class="medieval-font text-xl font-bold text-white" id="char-name">Alquimista Eldrin</h3>
+                            </div>
+                        </div>
+
+                        <!-- Texto da Proposta -->
+                        <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-900 text-slate-300 text-sm md:text-base leading-relaxed" id="event-description">
+                            "Saudações, Majestade. Para iniciarmos vosso glorioso reinado na era da economia moderna, proponho criarmos uma reserva líquida rápida de emergência. Devemos guardar 200 moedas em nosso cofre fortificado ou preferis usá-las para fazer um banquete popular imediatista?"
+                        </div>
+                    </div>
+
+                    <!-- Botões de Decisão -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-900">
+                        <!-- Opção Sim (Aceitar) -->
+                        <button id="btn-option-yes" onclick="makeChoice(true)" class="btn-medieval bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white rounded-xl p-4 border border-emerald-400/20 text-left transition relative">
+                            <div class="font-bold text-sm mb-1 text-emerald-100 flex justify-between items-center">
+                                <span>Aceitar Proposta</span>
+                                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                            </div>
+                            <p class="text-xs text-emerald-200/80 line-clamp-2" id="desc-option-yes">Guardar moedas e blindar o Reino.</p>
+                        </button>
+
+                        <!-- Opção Não (Rejeitar) -->
+                        <button id="btn-option-no" onclick="makeChoice(false)" class="btn-medieval bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white rounded-xl p-4 border border-rose-400/20 text-left transition relative">
+                            <div class="font-bold text-sm mb-1 text-rose-100 flex justify-between items-center">
+                                <span>Recusar Proposta</span>
+                                <i class="fa-solid fa-circle-xmark text-rose-400"></i>
+                            </div>
+                            <p class="text-xs text-rose-200/80 line-clamp-2" id="desc-option-no">Gastar com banquetes imediatos.</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Painel de Dica / Educação Financeira Relacionada -->
+                <div class="glass rounded-xl border border-amber-500/20 p-4 bg-amber-500/5 flex gap-3 items-start">
+                    <div class="text-amber-500 text-xl mt-0.5"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">Lição Econômica do Turno</h4>
+                        <p class="text-xs text-slate-300 mt-1" id="lbl-financial-insight">
+                            A reserva de emergência garante que seu reino não precise contrair empréstimos com juros absurdos em momentos de crise ou colheitas frustradas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÁREA DO GUIA FINANCEIRO -->
+            <div id="tab-guide" class="hidden glass rounded-2xl border border-slate-800 p-6 flex flex-col gap-4 overflow-y-auto max-h-[580px]">
+                <h3 class="medieval-font text-xl font-bold text-amber-400 border-b border-slate-800 pb-3">
+                    <i class="fa-solid fa-scroll mr-2"></i> Manual Financeiro de Administração Real
+                </h3>
+                
+                <div class="space-y-4 text-sm text-slate-300">
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+                        <h4 class="font-bold text-white mb-1"><span class="text-amber-500">1.</span> O Poder dos Juros Compostos (Cofre Real)</h4>
+                        <p class="text-xs">Moedas guardadas no Cofre Real não ficam ociosas. Elas rendem 3% a cada turno sobre o valor total acumulado. Deixar dinheiro trabalhando para você é o caminho mais rápido para a independência financeira e a prosperidade do Reino.</p>
+                    </div>
+                    
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+                        <h4 class="font-bold text-white mb-1"><span class="text-amber-500">2.</span> Ativos de Renda Passiva vs. Passivos Financeiros</h4>
+                        <p class="text-xs">Fazendas, Rotas e Minas são <strong>Ativos</strong>: colocam moedas no seu bolso todo turno. Banquetes exagerados, armas de luxo e empréstimos abusivos são <strong>Passivos</strong>: drenam recursos de forma contínua ou dão apenas felicidades temporárias.</p>
+                    </div>
+
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+                        <h4 class="font-bold text-white mb-1"><span class="text-amber-500">3.</span> Gestão de Risco e a Força de Trabalho</h4>
+                        <p class="text-xs">Expandir negócios sem ter cidadãos ativos para trabalharem neles é um erro crucial de alocação. Seus negócios perdem eficiência se a demanda de mão de obra for superior à população. Cuide também da alíquota de impostos para evitar emigração em massa!</p>
+                    </div>
+
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+                        <h4 class="font-bold text-white mb-1"><span class="text-amber-500">4.</span> Reserva de Emergência</h4>
+                        <p class="text-xs">Nunca fique sem liquidez (moedas de fácil acesso). Guerras, pragas e tempestades surgem sem aviso prévio. Se você não tiver reserva, terá que assinar contratos de taxas exorbitantes que destruirão seu fluxo de caixa.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PAINEL DA DIREITA: BALANÇO E LOJAS -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- SEÇÃO DE RECURSOS & BALANÇO PATRIMONIAL -->
+            <div class="glass rounded-2xl border border-slate-800 p-5 shadow-lg space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="medieval-font font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced text-amber-500"></i> Livro de Balanço Real
+                    </h3>
+                    <span class="text-[10px] uppercase font-bold text-slate-500">Sincronização Ativa</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Esquerda: Caixa e Cofre -->
+                    <div class="space-y-3">
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-900">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Ouro em Mão (Liquidez)</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-coins text-amber-400 text-lg"></i>
+                                <span class="text-lg font-bold text-white" id="lbl-gold">1.000</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-900 relative group">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block flex justify-between">
+                                <span>Cofre (Poupança)</span>
+                                <span class="text-emerald-400 font-bold">+3% p/t</span>
+                            </span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-vault text-blue-400 text-lg"></i>
+                                <span class="text-lg font-bold text-white" id="lbl-savings">0</span>
+                            </div>
+                            <!-- Botões de Depósito/Saque Rápido -->
+                            <div class="flex gap-2 mt-2 pt-2 border-t border-slate-800">
+                                <button onclick="openSavingsModal('deposit')" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[10px] font-bold py-1 rounded transition">Depositar</button>
+                                <button onclick="openSavingsModal('withdraw')" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[10px] font-bold py-1 rounded transition">Sacar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direita: População e Indicadores -->
+                    <div class="space-y-3">
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-900">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Cidadãos Totais</span>
+                                <span class="text-[9px] px-1.5 py-0.2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full" id="lbl-pop-growth">+5%</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-users text-blue-400 text-lg"></i>
+                                <span class="text-lg font-bold text-white" id="lbl-population">150</span>
+                            </div>
+                            <!-- Demanda de Mão de Obra -->
+                            <div class="mt-2 text-[10px] text-slate-400 flex justify-between">
+                                <span>Vagas de Emprego:</span>
+                                <strong id="lbl-jobs">0 / 0</strong>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-900">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Felicidade Social</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <i class="fa-solid fa-heart text-rose-500 text-lg"></i>
+                                <span class="text-lg font-bold text-white" id="lbl-happiness">85%</span>
+                            </div>
+                            <!-- Imposto Aplicado -->
+                            <div class="mt-2 flex items-center justify-between text-[10px]">
+                                <span class="text-slate-400">Imposto Real:</span>
+                                <select id="tax-select" onchange="changeTaxRate()" class="bg-slate-900 text-amber-400 font-bold border border-slate-700 rounded px-1 py-0.5 focus:outline-none">
+                                    <option value="low">Baixo (10%)</option>
+                                    <option value="medium" selected>Médio (20%)</option>
+                                    <option value="high">Alto (35%)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOJA DE ATIVOS DE RENDA PASSIVA -->
+            <div class="glass rounded-2xl border border-slate-800 p-5 space-y-4">
+                <h3 class="medieval-font font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-store text-amber-500"></i> Adquirir Ativos Reais
+                </h3>
+                <p class="text-xs text-slate-400">Compre fontes de renda para impulsionar suas receitas automáticas.</p>
+                
+                <div class="space-y-3">
+                    <!-- Fazenda de Trigo -->
+                    <div class="flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-slate-800 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 text-lg">
+                                <i class="fa-solid fa-wheat-awn"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white flex items-center gap-1">
+                                    <span>Fazendas Reais</span>
+                                    <span class="text-[10px] text-slate-500" id="count-farms">(0)</span>
+                                </h4>
+                                <p class="text-[10px] text-emerald-400">+15 moedas/turno <span class="text-slate-500">(requer 10 cidadãos)</span></p>
+                            </div>
+                        </div>
+                        <button onclick="buyAsset('farm')" id="btn-buy-farm" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-1.5 px-3 rounded-lg border border-amber-500/30 transition">
+                            250 <i class="fa-solid fa-coins"></i>
+                        </button>
+                    </div>
+
+                    <!-- Rota Comercial -->
+                    <div class="flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-slate-800 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 text-lg">
+                                <i class="fa-solid fa-ship"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white flex items-center gap-1">
+                                    <span>Rotas Comerciais</span>
+                                    <span class="text-[10px] text-slate-500" id="count-routes">(0)</span>
+                                </h4>
+                                <p class="text-[10px] text-emerald-400">+45 moedas/turno <span class="text-slate-500">(requer 25 cidadãos)</span></p>
+                            </div>
+                        </div>
+                        <button onclick="buyAsset('route')" id="btn-buy-route" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-1.5 px-3 rounded-lg border border-amber-500/30 transition">
+                            600 <i class="fa-solid fa-coins"></i>
+                        </button>
+                    </div>
+
+                    <!-- Minas de Ouro -->
+                    <div class="flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-slate-800 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 text-lg">
+                                <i class="fa-solid fa-mountain-city"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white flex items-center gap-1">
+                                    <span>Minas de Ouro</span>
+                                    <span class="text-[10px] text-slate-500" id="count-mines">(0)</span>
+                                </h4>
+                                <p class="text-[10px] text-emerald-400">+110 moedas/turno <span class="text-slate-500">(requer 50 cidadãos)</span></p>
+                            </div>
+                        </div>
+                        <button onclick="buyAsset('mine')" id="btn-buy-mine" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-1.5 px-3 rounded-lg border border-amber-500/30 transition">
+                            1.200 <i class="fa-solid fa-coins"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MELHORIAS SOCIAIS (INVESTIMENTOS SOCIAIS / UPGRADES) -->
+            <div class="glass rounded-2xl border border-slate-800 p-5 space-y-4">
+                <h3 class="medieval-font font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-amber-500"></i> Upgrades & Melhorias Estruturais
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Escola de Ofícios -->
+                    <button onclick="buyUpgrade('school')" id="btn-upgrade-school" class="bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2">
+                        <span class="text-[18px]">📖</span>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Escola de Ofícios</span>
+                            <span class="text-[10px] text-slate-500 block">+15% de Renda de Ativos</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400 mt-auto" id="lbl-price-school">500 moedas</span>
+                    </button>
+
+                    <!-- Hospital do Reino -->
+                    <button onclick="buyUpgrade('hospital')" id="btn-upgrade-hospital" class="bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2">
+                        <span class="text-[18px]">🏥</span>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Hospital Real</span>
+                            <span class="text-[10px] text-slate-500 block">Imunidade contra Pragas</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400 mt-auto" id="lbl-price-hospital">800 moedas</span>
+                    </button>
+
+                    <!-- Muralhas de Proteção -->
+                    <button onclick="buyUpgrade('muralha')" id="btn-upgrade-muralha" class="bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2">
+                        <span class="text-[18px]">🏰</span>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Muralhas de Aço</span>
+                            <span class="text-[10px] text-slate-500 block">Bloqueia Saques e Roubos</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400 mt-auto" id="lbl-price-muralha">1.000 moedas</span>
+                    </button>
+
+                    <!-- Festival do Povo -->
+                    <button onclick="triggerFestival()" id="btn-upgrade-festival" class="bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2">
+                        <span class="text-[18px]">🎉</span>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Festejo Real</span>
+                            <span class="text-[10px] text-slate-500 block">+25% de Felicidade Social</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400 mt-auto">200 moedas</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="bg-slate-950 text-center py-4 border-t border-slate-900 mt-8 text-xs text-slate-500">
+        <p>&copy; 2026 - O Reino da Prosperidade. Educar para Prosperar.</p>
+    </footer>
+
+    <!-- MODAL DOS JUROS / COFRE (DEPÓSITOS E SAQUES) -->
+    <div id="savings-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="max-w-md w-full glass rounded-xl border border-slate-700 p-6 space-y-4">
+            <h3 class="medieval-font font-bold text-lg text-white" id="savings-modal-title">Operação de Cofre</h3>
+            <p class="text-xs text-slate-400">Rendimento de 3% sobre o total acumulado a cada virada de ciclo.</p>
+            
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-300 uppercase">Quantidade de Moedas:</label>
+                <input type="number" id="savings-amount" min="1" placeholder="Quantidade" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500">
+                <span class="text-[11px] text-slate-400 block" id="lbl-max-savings">Disponível em Caixa: 1.000</span>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeSavingsModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg font-semibold text-xs">Cancelar</button>
+                <button id="btn-confirm-savings" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white py-2 rounded-lg font-semibold text-xs">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DO GAME OVER -->
+    <div id="gameover-modal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 hidden">
+        <div class="max-w-md w-full glass rounded-xl border border-rose-500/30 p-8 text-center space-y-6">
+            <div class="w-20 h-20 bg-rose-500/10 border border-rose-500/30 text-rose-500 text-4xl rounded-full flex items-center justify-center mx-auto animate-bounce">
+                💀
+            </div>
+            <div class="space-y-2">
+                <h2 class="medieval-font text-2xl font-bold text-white">Falência do Reino!</h2>
+                <p class="text-sm text-slate-400" id="gameover-reason">Seu caixa ficou negativo e as dívidas causaram uma revolta civil no reino.</p>
+            </div>
+            
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-left space-y-2">
+                <h3 class="text-xs font-bold uppercase text-amber-400">Desempenho Geral</h3>
+                <div class="flex justify-between text-xs text-slate-300">
+                    <span>Turnos Sobrevividos:</span>
+                    <strong id="end-cycles">12</strong>
+                </div>
+                <div class="flex justify-between text-xs text-slate-300">
+                    <span>Ativos Acumulados:</span>
+                    <strong id="end-assets">0</strong>
+                </div>
+                <div class="flex justify-between text-xs text-slate-300">
+                    <span>Maior População:</span>
+                    <strong id="end-pop">150</strong>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="w-full btn-medieval bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold py-2.5 rounded-lg border border-amber-400/20">
+                Iniciar Nova Dinastia
             </button>
         </div>
     </div>
 
+    <!-- NOTIFICAÇÃO POPUP CUSTOMIZADA (Sem Alert) -->
+    <div id="custom-toast" class="fixed bottom-6 right-6 z-50 glass border border-amber-500/40 p-4 rounded-xl shadow-2xl max-w-sm flex gap-3 items-start transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="text-amber-500 text-lg mt-0.5" id="toast-icon">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-white" id="toast-title">Aviso Real</h4>
+            <p class="text-xs text-slate-300 mt-0.5" id="toast-desc">Ocorreu um evento no reino.</p>
+        </div>
+    </div>
+
+    <!-- SISTEMA E LÓGICA DO JOGO -->
     <script>
-        // --- SINTETIZADOR DE ÁUDIO NATIVO ---
-        let audioCtx;
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-        
-        function playSound(type) {
-            initAudio();
-            if (!audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'click') {
-                    osc.frequency.setValueAtTime(280, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.08);
-                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.08);
-                } else if (type === 'coin') {
-                    osc.frequency.setValueAtTime(650, audioCtx.currentTime);
-                    osc.frequency.setValueAtTime(950, audioCtx.currentTime + 0.07);
-                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.22);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.22);
-                } else if (type === 'error') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(130, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime + 0.25);
-                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.25);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.25);
-                } else if (type === 'success') {
-                    osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-                    osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.12);
-                    osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.45);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.45);
-                }
-            } catch (e) {
-                console.log("Áudio bloqueado pelo navegador.");
-            }
-        }
-
-        // --- ESTADO DO SIMULADOR ---
-        let state = {
-            playerName: "Rei Arthur",
-            kingdomName: "Prosperis",
-            gold: 800,
-            vaultGold: 100,
-            population: 100,
-            happiness: 80,
-            cycle: 1, 
-            decisionsThisCycle: 0,
-            maxDecisionsPerCycle: 3,
-            
-            // Portfólio de Ativos
-            farms: 0,
-            tradeRoutes: 0,
-            mines: 0,
-            
-            // Melhorias estruturais (Upgrades comprados)
-            hasSchool: false,      // Escola de ofícios (+15% eficiência)
-            hasHospital: false,    // Proteção de população contra epidemias
-            hasBorderPost: false,  // Imigração constante (+3 servos/ciclo)
-            hasWalls: false,       // Impede saques e roubos aleatórios
-            hasCropInsurance: false, // Proteção contra intempéries climáticas
-            
-            // Alíquota tributária
-            taxLevel: 'med', // 'low', 'med', 'high'
-            
-            // Passivos e Dívidas estruturais
-            debt: 0,
-            interestRate: 0.08,
-            vaultInterestRate: 0.03,
-            
-            maxGoldReached: 900
+        // ESTADO GLOBAL DO JOGO
+        let gameState = {
+            king: "",
+            kingdom: "",
+            username: "",
+            password: "",
+            cycle: 1,
+            gold: 1000,
+            savings: 0,
+            population: 150,
+            happiness: 85,
+            taxRate: "medium", // low, medium, high
+            assets: {
+                farm: 0,
+                route: 0,
+                mine: 0
+            },
+            upgrades: {
+                school: false,
+                hospital: false,
+                muralha: false
+            },
+            history: [] // Armazena escolhas efetuadas
         };
 
-        const shopPrices = { farm: 150, route: 300, mine: 400 };
-        const upgradePrices = { school: 250, hospital: 350, border: 200, walls: 180, festival: 80 };
+        // ABLY REALTIME INTEGRATION
+        const apiKey = "Okndvg.P6xHUQ:HuhotEkdOVi5ZZv3VM4_S5mL6D9WXPstKchSeIbhpwY";
+        let ably = null;
+        let saveChannel = null;
 
-        // --- ACERVO DE CARTAS ESCRITAS À MÃO, TOTALMENTE ÚNICAS (SEM REPETIÇÕES) ---
-        const uniqueDeck = [
-            {
-                characterName: "Mestra Helena, Construtora",
-                role: "Investidora de Renda Passiva",
-                emoji: "👩‍💼",
-                dialogue: "Majestade, fundar uma nova Rota Comercial permanente custa 300g, mas garantirá a entrada imediata e perpétua de +40g ao fim de cada ciclo. Quer fechar o contrato?",
-                yesOutcome: (s) => {
-                    s.gold -= 300;
-                    s.tradeRoutes += 1;
-                    showToast("Ativo adquirido: Rota Comercial!");
-                },
-                noOutcome: (s) => { showToast("Você preteriu o crescimento da renda passiva."); },
-                financialTip: "Isso representa um investimento real em Ativos Geradores de Fluxo de Caixa. Comprar investimentos consistentes acelera a liberdade financeira."
-            },
-            {
-                characterName: "Lorde Reginald de Bardi",
-                role: "Agiota da Alta Corte",
-                emoji: "🕴️",
-                dialogue: "Estás sem ouro líquido? Ofereço-te 400g imediatamente! Em troca, assinarás uma nota promissória assumindo um passivo de 400g com juros de 8% por ciclo.",
-                yesOutcome: (s) => {
-                    s.gold += 400;
-                    s.debt += 400;
-                    showToast("Passivo adquirido: Empréstimo de Alto Risco.");
-                },
-                noOutcome: (s) => { showToast("Você rejeitou o crédito rotativo abusivo."); },
-                financialTip: "Empréstimos de consumo de curto prazo são passivos perigosos. Evite endividamento que cobre juros maiores do que o rendimento de seus ativos."
-            },
-            {
-                characterName: "Vigarista Estevão",
-                role: "Agente de Pirâmides",
-                emoji: "🎩",
-                dialogue: "Majestade! Desenvolvi um algoritmo de transmutação de pirita que dobra seu ouro em dois turnos! Invista 500g agora e garanta 1500g livres sem nenhum esforço!",
-                yesOutcome: (s) => {
-                    if (Math.random() > 0.9) {
-                        s.gold += 1000;
-                        showToast("Sorte irracional! Você retirou o dinheiro antes do esquema desmoronar.");
+        // Função rápida para encriptar string de forma síncrona/assíncrona leve para o nome do canal
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Inicializar Ably e Sincronizar Nuvem
+        async function initializeAbly(username, password) {
+            const statusEl = document.getElementById('login-status');
+            statusEl.classList.remove('hidden');
+            document.getElementById('btn-start').disabled = true;
+
+            try {
+                // Hashing para gerar um nome de canal seguro baseado na credencial informada
+                const channelHash = await hashString(username + ":" + password);
+                const channelName = `reino-save-${channelHash}`;
+
+                // Iniciar conexão Ably
+                ably = new Ably.Realtime({ key: apiKey });
+                saveChannel = ably.channels.get(channelName);
+
+                // Consultar se há progresso salvo no histórico (persistência de 2 minutos standard ou permanente se ativo)
+                saveChannel.history({ limit: 1 }, (err, resultPage) => {
+                    if (err) {
+                        console.error("Erro ao ler histórico de nuvem: ", err);
+                        // Se houver erro, apenas continua localmente
+                        startLocalNewGame();
+                        return;
+                    }
+
+                    const messages = resultPage.items;
+                    if (messages && messages.length > 0) {
+                        // PROGRESSO ENCONTRADO - RESTAURAR ESTADO
+                        const loadedState = messages[0].data;
+                        gameState = { ...gameState, ...loadedState };
+                        showToast("Nuvem", "Reino recuperado da nuvem Ably com sucesso!", "fa-cloud");
+                        startGameplay();
                     } else {
-                        s.gold -= 500;
-                        showToast("Estevão sumiu na calada da noite! Golpe financeiro clássico.");
+                        // NENHUM HISTÓRICO - INICIAR NOVO
+                        startLocalNewGame();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Conexão falhou, rodando em modo offline.", error);
+                startLocalNewGame();
+            }
+        }
+
+        function startLocalNewGame() {
+            gameState.king = document.getElementById('input-king').value.trim() || "Rei Arthur";
+            gameState.kingdom = document.getElementById('input-kingdom').value.trim() || "Camelot";
+            gameState.username = document.getElementById('cloud-username').value.trim();
+            gameState.password = document.getElementById('cloud-password').value.trim();
+            
+            // Grava primeiro save na nuvem
+            saveGameToCloud();
+            startGameplay();
+        }
+
+        // Envia estado atualizado para o canal seguro do Ably
+        function saveGameToCloud() {
+            if (!saveChannel) return;
+
+            const cloudIndicator = document.getElementById('cloud-indicator');
+            const cloudStatus = document.getElementById('cloud-status');
+
+            cloudIndicator.classList.remove('text-green-400');
+            cloudIndicator.classList.add('text-amber-500');
+            cloudStatus.textContent = "Sincronizando...";
+
+            saveChannel.publish('save-state', gameState, (err) => {
+                if (err) {
+                    console.error("Erro ao salvar dados na nuvem Ably: ", err);
+                    cloudIndicator.classList.remove('text-amber-500');
+                    cloudIndicator.classList.add('text-rose-500');
+                    cloudStatus.textContent = "Erro na Nuvem";
+                } else {
+                    cloudIndicator.classList.remove('text-amber-500', 'text-rose-500');
+                    cloudIndicator.classList.add('text-green-400');
+                    cloudStatus.textContent = "Sincronizado";
+                }
+            });
+        }
+
+        // INICIAR DE FATO A JOGABILIDADE
+        function startGameplay() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            playSound('upgrade');
+
+            // Setar nomes do reino e rei
+            document.getElementById('lbl-kingdom-name').textContent = gameState.kingdom;
+            document.getElementById('lbl-king-name').textContent = `Governo de ${gameState.king}`;
+
+            // Sincronizar UI
+            updateUI();
+            generateNextCard();
+        }
+
+        // ALTERAR ABAS DE VISUALIZAÇÃO
+        function switchTab(tab) {
+            playSound('click');
+            const gameBtn = document.getElementById('tab-btn-game');
+            const guideBtn = document.getElementById('tab-btn-guide');
+            const gameArea = document.getElementById('tab-game');
+            const guideArea = document.getElementById('tab-guide');
+
+            if (tab === 'game') {
+                gameBtn.className = "flex-1 py-2 rounded-md font-semibold text-xs uppercase tracking-wider text-amber-400 bg-slate-950 border border-amber-500/20";
+                guideBtn.className = "flex-1 py-2 rounded-md font-semibold text-xs uppercase tracking-wider text-slate-400 hover:text-white transition";
+                gameArea.classList.remove('hidden');
+                guideArea.classList.add('hidden');
+            } else {
+                guideBtn.className = "flex-1 py-2 rounded-md font-semibold text-xs uppercase tracking-wider text-amber-400 bg-slate-950 border border-amber-500/20";
+                gameBtn.className = "flex-1 py-2 rounded-md font-semibold text-xs uppercase tracking-wider text-slate-400 hover:text-white transition";
+                guideArea.classList.remove('hidden');
+                gameArea.classList.add('hidden');
+            }
+        }
+
+        // TOAST / POPUP PERSONALIZADO
+        function showToast(title, desc, icon = "fa-circle-exclamation") {
+            const toast = document.getElementById('custom-toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-desc').textContent = desc;
+            document.getElementById('toast-icon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
+
+        // DEZENAS DE CARTAS DE EVENTOS EXCLUSIVOS E DETALHADOS (Mínimo de 40 cartas artesanais robustas)
+        const eventCards = [
+            {
+                id: 1,
+                character: "🧙‍♂️ Alquimista Eldrin",
+                tag: "Educação Financeira",
+                description: "Desejo abrir uma fundação de Alquimia Estatal. Se nos der 200 moedas, garanto tentar descobrir a receita secreta de criar ouro falso. O risco é elevado, mas o retorno pode ser de até +500%.",
+                insight: "Investimentos com promessas de retornos altíssimos geralmente vêm acompanhados de riscos imensos. Avalie a liquidez.",
+                yesOption: "Financiar Pesquisa (200 moedas)",
+                noOption: "Ignorar Alquimista",
+                onYes: () => {
+                    if (gameState.gold >= 200) {
+                        gameState.gold -= 200;
+                        if (Math.random() > 0.8) {
+                            gameState.gold += 800;
+                            playSound('coins');
+                            return { text: "Sucesso! O alquimista transformou chumbo em barras valiosas de ouro. Lucro colossal de 800 moedas!", isPositive: true };
+                        } else {
+                            playSound('loss');
+                            return { text: "Fracasso completo! As poções explodiram o laboratório. Você perdeu as 200 moedas e a felicidade popular caiu.", isPositive: false, stats: { happiness: -15 } };
+                        }
+                    } else {
+                        return { text: "Sem ouro suficiente no cofre real para autorizar este projeto de alto risco.", isPositive: false };
                     }
                 },
-                noOutcome: (s) => { showToast("Evitado com sucesso! Você desconfiou de promessas mágicas."); },
-                financialTip: "Esquemas Ponzi ou pirâmides prometem lucros fáceis, irreais e sem lastro real de produção. Se parece bom demais para ser verdade, é golpe."
+                onNo: () => {
+                    return { text: "Negado. Evitamos queimar fundos públicos com especulações sem comprovação científica ou real.", isPositive: true };
+                }
             },
             {
-                characterName: "Morgana, a Corretora",
-                role: "Seguradora Agrícola",
-                emoji: "🛡️",
-                dialogue: "Inundações periódicas costumam dizimar plantações. Compre nossa apólice de seguro contra catástrofes agrícolas por 100g para proteger suas fazendas no próximo ciclo.",
-                yesOutcome: (s) => {
-                    s.gold -= 100;
-                    s.hasCropInsurance = true;
-                    showToast("Mitigação ativada: Seguro Agrícola contratado.");
-                },
-                noOutcome: (s) => { showToast("Você optou por rodar o risco sem proteção."); },
-                financialTip: "A contratação de seguros é um custo de mitigação de riscos essencial para proteger o patrimônio contra desastres improváveis, mas devastadores."
-            },
-            {
-                characterName: "Taverneiro Barnabé",
-                role: "Líder Operário",
-                emoji: "🍺",
-                dialogue: "Majestade, se você decretar a redução da taxa de impostos ao patamar Leve (5%), as tabernas ficarão cheias e a felicidade do povo aumentará em +15% imediatamente!",
-                yesOutcome: (s) => {
-                    s.taxLevel = 'low';
-                    s.happiness = Math.min(100, s.happiness + 15);
-                    showToast("Tributação reduzida! O povo celebra nas tabernas.");
-                },
-                noOutcome: (s) => { showToast("Você manteve a governança fiscal firme."); },
-                financialTip: "Tributação leve estimula a retenção demográfica, consumo interno e a felicidade geral, embora restrinja a receita de curto prazo do estado."
-            },
-            {
-                characterName: "Madre Angélica",
-                role: "Curadora Sanitária",
-                emoji: "🧕",
-                dialogue: "Pragas letais atacam nossas favelas ciclicamente. Ajude-nos com uma doação urgente de 200g para saneamento básico imediato. Isso evitará dezenas de mortes camponesas.",
-                yesOutcome: (s) => {
-                    s.gold -= 200;
-                    s.happiness += 10;
-                    s.population += 12;
-                    showToast("Doação realizada. Saneamento expandido.");
-                },
-                noOutcome: (s) => {
-                    s.population = Math.max(5, s.population - 15);
-                    s.happiness -= 8;
-                    showToast("Epidemia local ceifou 15 cidadãos por falta de saneamento.");
-                },
-                financialTip: "Investir em infraestrutura sanitária e de saúde preventiva reduz a taxa de mortalidade e protege seu principal ativo produtivo: a população."
-            },
-            {
-                characterName: "Ferreiro Brom, o Forjador",
-                role: "Industrial Metalúrgico",
-                emoji: "⚒️",
-                dialogue: "Desenvolvi fôrmas de fundição otimizadas para mineração! Se me financiar com 250g, a produção de todas as suas minas ativas subirá em +20g por ciclo para sempre.",
-                yesOutcome: (s) => {
-                    s.gold -= 250;
-                    s.hasSchool = true; // Simula avanço de eficiência técnica
-                    showToast("Financiamento industrial aprovado!");
-                },
-                noOutcome: (s) => { showToast("Upgrade de eficiência rejeitado."); },
-                financialTip: "Gastos com melhoria técnica, maquinários e automação representam investimentos de CAPEX. Eles reduzem custos operacionais e multiplicam a eficiência."
-            },
-            {
-                characterName: "O Ourives Imperial",
-                role: "Oficial da Casa da Moeda",
-                emoji: "🪙",
-                dialogue: "Nosso estoque de ouro físico está sob pressão. Podemos misturar cobre nas moedas reais para emitir 300g imediatos! No entanto, a desconfiança reduzirá a felicidade em -15%.",
-                yesOutcome: (s) => {
-                    s.gold += 300;
-                    s.happiness -= 15;
-                    showToast("Dinheiro fiduciário depreciado emitido!");
-                },
-                noOutcome: (s) => { showToast("Integridade da moeda nacional mantida."); },
-                financialTip: "Emitir dinheiro sem lastro real de riqueza ou produção causa inflação, corrói o poder de compra real e destrói a confiança dos investidores."
-            },
-            {
-                characterName: "Capitão Kyle",
-                role: "Chefe de Defesa",
-                emoji: "💂",
-                dialogue: "Infiltrados estão rondando os muros da cidade. Se não financiarmos uma patrulha noturna por 150g, podemos sofrer saques catastróficos no caixa líquido.",
-                yesOutcome: (s) => {
-                    s.gold -= 150;
-                    s.hasWalls = true;
-                    showToast("Defesas urbanas fortalecidas.");
-                },
-                noOutcome: (s) => { showToast("Patrulha recusada. Assumiu o risco de invasão."); },
-                financialTip: "Gastos em segurança institucional atuam como blindagem patrimonial. Perder riqueza acumulada por falta de prevenção anula anos de economia."
-            },
-            {
-                characterName: "Aristocrata Elizabeth",
-                role: "Especuladora de Arte",
-                emoji: "👸",
-                dialogue: "Um renomado pintor produziu um retrato épico de sua dinastia. Custa 200g, e dizem que seu prestígio aumentará substancialmente. Compramos este ativo intangível?",
-                yesOutcome: (s) => {
-                    s.gold -= 200;
-                    s.happiness += 12;
-                    showToast("Retrato régio adquirido para exibição na corte.");
-                },
-                noOutcome: (s) => { showToast("Você rejeitou investir em itens intangíveis de luxo."); },
-                financialTip: "Obras de arte e colecionáveis são ativos alternativos de alta volatilidade e baixa liquidez. Devem ser evitados por investidores iniciantes."
-            },
-            {
-                characterName: "Estudante Thomas",
-                role: "Pesquisador Acadêmico",
-                emoji: "📖",
-                dialogue: "Majestade, peço uma bolsa de estudos de 120g para mapear novas jazidas de minério no norte. Se a expedição for vitoriosa, receberemos uma Mina Imperial de graça!",
-                yesOutcome: (s) => {
-                    s.gold -= 120;
-                    if (Math.random() > 0.5) {
-                        s.mines += 1;
-                        showToast("Expedição triunfante! Uma nova mina de ferro foi descoberta.");
+                id: 2,
+                character: "🌾 Camponesa Clara",
+                tag: "Gestão de Ativos",
+                description: "Nossas safras familiares de trigo estão sendo dizimadas por besouros do deserto. Se nos emprestar 150 moedas, podemos comprar insumos de cal viva para salvar a plantação e manter a produtividade alta.",
+                insight: "Proteger seus ativos produtivos de eventos sazonais evita a perda da sua fonte de renda passiva recorrente.",
+                yesOption: "Fornecer Insumos (150 moedas)",
+                noOption: "Negar Ajuda",
+                onYes: () => {
+                    if (gameState.gold >= 150) {
+                        gameState.gold -= 150;
+                        gameState.happiness += 10;
+                        gameState.population += 15;
+                        playSound('upgrade');
+                        return { text: "Gracas a seu aporte rápido de capital de giro, a produção de alimentos dobrou. Nova imigração no reino!", isPositive: true };
                     } else {
-                        showToast("A expedição falhou em mapear depósitos economicamente viáveis.");
+                        return { text: "Sem ouro em caixa para prover subsídio agrícola imediato.", isPositive: false };
                     }
                 },
-                noOutcome: (s) => { showToast("Bolsa de pesquisa indeferida."); },
-                financialTip: "Investir em Pesquisa e Desenvolvimento (P&D) envolve incertezas, mas é o único motor capaz de propiciar saltos disruptivos de produtividade."
+                onNo: () => {
+                    gameState.happiness -= 15;
+                    gameState.population -= 10;
+                    playSound('loss');
+                    return { text: "Os besouros devoraram as fazendas. A fome reduziu o comércio e provocou emigração de colonos.", isPositive: false };
+                }
             },
             {
-                characterName: "Sindicato de Tecelões",
-                role: "Cartel de Ofício",
-                emoji: "🧑‍🏭",
-                dialogue: "Nossos artesãos demandam subsídios de 100g para modernizar os teares locais. Se concedido, o reino atrairá +10 trabalhadores especialistas de outros ducados.",
-                yesOutcome: (s) => {
-                    s.gold -= 100;
-                    s.population += 10;
-                    s.happiness += 5;
-                    showToast("Subsídio aos tecelões concedido.");
+                id: 3,
+                character: "🏦 Agiota Lord Varis",
+                tag: "Financiamentos",
+                description: "Precisa de ouro instantâneo? Posso lhe conceder uma linha de crédito emergencial de 400 moedas. No entanto, você precisará pagar de volta o total de 600 moedas no próximo ciclo.",
+                insight: "O crédito fácil é uma armadilha se os juros cobrados forem superiores ao retorno real dos investimentos onde você aplicará esse dinheiro.",
+                yesOption: "Aceitar Dívida (+400 moedas)",
+                noOption: "Rejeitar Crédito",
+                onYes: () => {
+                    gameState.gold += 400;
+                    playSound('coins');
+                    // Agenda débito forçado para o próximo turno
+                    gameState.debt = 600;
+                    return { text: "Capital recebido. Lembre-se: no próximo turno, Lord Varis deduzirá automaticamente as 600 moedas diretamente do seu saldo.", isPositive: true };
                 },
-                noOutcome: (s) => { showToast("Tecelões revoltados. Imigração técnica paralisada."); },
-                financialTip: "Incentivos fiscais bem desenhados e direcionados podem atrais talentos qualificados, elevando o capital humano produtivo do território."
+                onNo: () => {
+                    return { text: "Excelente decisão. A taxa de juros anualizada de 50% acabaria por corroer a saúde de vosso caixa real.", isPositive: true };
+                }
             },
             {
-                characterName: "Aventureiro Mascarado",
-                role: "Explorador de Criptas",
-                emoji: "🤠",
-                dialogue: "Encontrei um mapa para uma tumba ancestral repleta de relíquias de platina! Financie minha descida com 250g de ouro e dividiremos todos os espólios ao meio!",
-                yesOutcome: (s) => {
-                    s.gold -= 250;
-                    if (Math.random() > 0.7) {
-                        s.gold += 650;
-                        showToast("Incrível! O explorador retornou carregado de riquezas preciosas!");
+                id: 4,
+                character: "⛪ Cardeal Silas",
+                tag: "Investimento Social",
+                description: "A igreja local quer construir um orfanato e hospital para os filhos de mineiros desabrigados. Pedimos uma contribuição nobre de 300 moedas para erguer os alicerces espirituais do povo.",
+                insight: "Investimentos em saúde e segurança social criam capital social estável e reduzem drasticamente custos ocultos de crises.",
+                yesOption: "Apoiar Igreja (300 moedas)",
+                noOption: "Rejeitar Pedido",
+                onYes: () => {
+                    if (gameState.gold >= 300) {
+                        gameState.gold -= 300;
+                        gameState.happiness += 20;
+                        gameState.population += 25;
+                        playSound('upgrade');
+                        return { text: "Sua boa fé aumentou o prestígio social e reduziu o impacto de pestes infantis de forma definitiva.", isPositive: true };
                     } else {
-                        showToast("O explorador não resistiu aos perigos da cripta. Perda total do capital.");
+                        return { text: "Moedas de ouro insuficientes para patrocinar grandes obras filantrópicas.", isPositive: false };
                     }
                 },
-                noOutcome: (s) => { showToast("Você rejeitou financiar buscas especulativas de alto risco."); },
-                financialTip: "Investimentos de altíssimo risco e capital de venture extremo devem compor apenas uma parcela ínfima e descartável do seu portfólio."
+                onNo: () => {
+                    gameState.happiness -= 10;
+                    return { text: "O clero ficou decepcionado com vossa rigidez orçamentária e a insatisfação popular cresceu ligeiramente.", isPositive: false };
+                }
             },
             {
-                characterName: "Comerciante Varis",
-                role: "Importador de Commodities",
-                emoji: "⛵",
-                dialogue: "Uma grande seca atingiu os portos vizinhos, inflando os preços dos grãos. Podemos exportar metade de nossas reservas por 200g imediatos, mas a felicidade cairá em -10%.",
-                yesOutcome: (s) => {
-                    s.gold += 200;
-                    s.happiness -= 10;
-                    showToast("Exportação agrícola emergencial efetuada.");
+                id: 5,
+                character: "🗡️ General Gidran",
+                tag: "Prevenção de Danos",
+                description: "Vandados e mercenários vizinhos pretendem saquear nossas fronteiras de comércio ao norte. Se nos conceder 250 moedas, armarei as patrulhas para defendermos nossa integridade fiscal física.",
+                insight: "Despesas de segurança de infraestrutura funcionam como apólice de seguro contra sinistros que poderiam quebrar o negócio.",
+                yesOption: "Equipar Soldados (250 moedas)",
+                noOption: "Deixar por conta do destino",
+                onYes: () => {
+                    if (gameState.gold >= 250) {
+                        gameState.gold -= 250;
+                        playSound('upgrade');
+                        return { text: "As patrulhas interceptaram com maestria os criminosos. Rotas do norte permanecem pacíficas e lucrativas.", isPositive: true };
+                    } else {
+                        return { text: "Sem verba imediata. Nossas defesas ficam temporariamente desguarnecidas.", isPositive: false };
+                    }
                 },
-                noOutcome: (s) => { showToast("Você optou por priorizar a segurança alimentar do seu povo."); },
-                financialTip: "Aproveitar picos especulativos de preços pode gerar ganhos rápidos de tesouraria, mas arrisca desabastecer e inflacionar a cadeia local."
+                onNo: () => {
+                    if (gameState.upgrades.muralha) {
+                        return { text: "As Muralhas de Aço em sua fronteira bloquearam o assalto com eficácia! Nenhum recurso foi roubado.", isPositive: true };
+                    } else {
+                        const lostGold = Math.min(gameState.gold, 400);
+                        gameState.gold -= lostGold;
+                        gameState.happiness -= 15;
+                        playSound('loss');
+                        return { text: `Desastre! Os mercenários saquearam vossas comitivas e roubaram ${lostGold} moedas direto da tesouraria nacional.`, isPositive: false };
+                    }
+                }
             },
             {
-                characterName: "Conselheiro de Guerra Alistair",
-                role: "Estrategista de Defesa",
-                emoji: "⚔️",
-                dialogue: "Os clãs das montanhas estão reunindo guerreiros. Podemos realizar um ataque preventivo contratando mercenários por 300g. Isso garantirá estabilidade pacífica.",
-                yesOutcome: (s) => {
-                    s.gold -= 300;
-                    s.happiness += 8;
-                    showToast("Mercenários neutralizaram os clãs com sucesso.");
+                id: 6,
+                character: "🎩 Vendedor de Elixir Barnaby",
+                tag: "Fraude / Golpe",
+                description: "Apresento-lhes o tônico da prosperidade vitalícia do Oriente! Se comprar este lote exclusivo por 100 moedas, o povo beberá e trabalhará sem parar. Garanto aumento imediato de produtividade física em 40%!",
+                insight: "Desconfie de 'fórmulas mágicas' ou atalhos fáceis para gerar produtividade ou ganhar dinheiro sem base real.",
+                yesOption: "Comprar Lote (100 moedas)",
+                noOption: "Expulsar Vendedor",
+                onYes: () => {
+                    if (gameState.gold >= 100) {
+                        gameState.gold -= 100;
+                        if (Math.random() > 0.9) {
+                            gameState.happiness += 10;
+                            return { text: "Incrível! O tônico continha estimulantes à base de mel que agradaram o paladar dos camponeses.", isPositive: true };
+                        } else {
+                            gameState.happiness -= 15;
+                            gameState.population -= 10;
+                            playSound('loss');
+                            return { text: "Vigarice! O elixir provocou dores intestinais brutas nas equipes de fazenda, reduzindo a força produtiva do reino.", isPositive: false };
+                        }
+                    } else {
+                        return { text: "Faltam moedas para fechar o negócio com Barnaby.", isPositive: false };
+                    }
                 },
-                noOutcome: (s) => {
-                    s.population = Math.max(5, s.population - 10);
-                    s.gold = Math.max(-500, s.gold - 100);
-                    showToast("Invasão bárbara! Custou 100g em danos e dizimou 10 servos.");
-                },
-                financialTip: "Prevenir desastres geopolíticos ou operacionais costuma ser muito mais barato do que reconstruir estruturas e ativos após o impacto do choque."
+                onNo: () => {
+                    return { text: "Excelente senso de ceticismo econômico. Você poupou fundos de um golpe bem orquestrado.", isPositive: true };
+                }
             },
             {
-                characterName: "Juiz Suprema da Corte",
-                role: "Magistrada Regente",
-                emoji: "⚖️",
-                dialogue: "Nossos tribunais comerciais estão congestionados por disputas contratuais bobas. Invista 180g na contratação de escrivães de arbitragem para acelerar sentenças comerciais.",
-                yesOutcome: (s) => {
-                    s.gold -= 180;
-                    s.tradeRoutes += 0.5; // Melhora o fluxo de ativos
-                    showToast("Arbitragem contratual modernizada e ágil.");
+                id: 7,
+                character: "🌾 Minerador Boris",
+                tag: "Investimento de Capital",
+                description: "Majestade, encontramos indícios de uma grande veia de ferro nas montanhas do oeste. Se pagar 350 moedas para comprarmos picaretas e dinamites pesadas, nosso ganho com extração será muito beneficiado.",
+                insight: "Capital Expenditure (CAPEX) melhora as ferramentas de trabalho aumentando as margens de lucro dos seus canais de renda passiva.",
+                yesOption: "Investir na Escavação (350 moedas)",
+                noOption: "Recusar Aporte",
+                onYes: () => {
+                    if (gameState.gold >= 350) {
+                        gameState.gold -= 350;
+                        gameState.assets.mine += 1;
+                        playSound('upgrade');
+                        return { text: "Picaretas novas adquiridas! Adicionamos uma Mina de Ouro funcional aos seus ativos produtivos de forma automática.", isPositive: true };
+                    } else {
+                        return { text: "Sua tesouraria não possui fundos livres para este avanço mineral.", isPositive: false };
+                    }
                 },
-                noOutcome: (s) => { showToast("Tribunais lentos. Investidores evitam comerciar no reino."); },
-                financialTip: "Segurança jurídica e rapidez na resolução de contratos formam a base institucional para a atração de capitais e desenvolvimento."
+                onNo: () => {
+                    return { text: "Mina inexplorada. Você manteve seu ouro atual seguro na carteira principal.", isPositive: true };
+                }
             },
             {
-                characterName: "O Mensageiro da Fronteira",
-                role: "Embaixador de Ducado Vizinho",
-                emoji: "🐎",
-                dialogue: "Nosso ducado aliando está falido e sob ataque de cobradores do norte. Envie uma ajuda militar emergencial de 250g. Eles se comprometerão a enviar impostos futuros.",
-                yesOutcome: (s) => {
-                    s.gold -= 250;
-                    s.tradeRoutes += 1; // Representa o pagamento futuro estável das rotas
-                    showToast("Apoio internacional efetuado. Rota comercial gerada!");
+                id: 8,
+                character: "🚢 Capitã Selene",
+                tag: "Diversificação",
+                description: "Proponho uma sociedade internacional na exploração do Novo Mundo. Se investir 450 moedas para baratearmos a caravela, dividiremos todos os lucros de especiarias importadas que ancorarem.",
+                insight: "Diversificar geograficamente as fontes geradoras de renda protege seu capital contra riscos locais, como pragas agrícolas ou conflitos regionais.",
+                yesOption: "Subsidiar Navio (450 moedas)",
+                noOption: "Negar Apoio",
+                onYes: () => {
+                    if (gameState.gold >= 450) {
+                        gameState.gold -= 450;
+                        if (Math.random() > 0.4) {
+                            gameState.gold += 900;
+                            playSound('coins');
+                            return { text: "A caravela retornou com ouro bruto de novos mercados! Lucro extraordinário de 900 moedas líquidas.", isPositive: true };
+                        } else {
+                            playSound('loss');
+                            return { text: "Infelizmente, uma tempestade assolou a comitiva e naufragou o navio segurador. Perda integral dos fundos investidos.", isPositive: false };
+                        }
+                    } else {
+                        return { text: "Sem ouro livre suficiente em tesouraria real.", isPositive: false };
+                    }
                 },
-                noOutcome: (s) => { showToast("Aliança rejeitada. O ducado vizinho colapsou isolado."); },
-                financialTip: "Ouro alocado em socorro financeiro internacional estratégico pode converter-se em parcerias valiosas e proteção contra riscos externos."
+                onNo: () => {
+                    return { text: "Negócio declinado. Você optou por manter suas reservas intocadas de forma conservadora.", isPositive: true };
+                }
             },
             {
-                characterName: "Padeiro Cooperativo Jacó",
-                role: "Líder Comunitário",
-                emoji: "🧑‍🍳",
-                dialogue: "Desejamos fundar uma guilda cooperativa de moinhos por 150g. A cooperativa dividirá os riscos das safras e aumentará a felicidade do povo em +10%.",
-                yesOutcome: (s) => {
-                    s.gold -= 150;
-                    s.happiness += 10;
-                    s.farms += 0.5; // Meia fazenda pela guilda
-                    showToast("Moinho cooperativo fundado!");
+                id: 9,
+                character: "📜 Auditor Real Thomas",
+                tag: "Custos Ocultos",
+                description: "Identificamos ratos e infiltração acelerada estragando trigo nos armazéns centrais. Corrigir as estruturas custará 180 moedas de ouro agora, ou perderemos as reservas alimentares em breve.",
+                insight: "Manutenção periódica evita a depreciação acelerada dos ativos físicos de sua carteira econômica.",
+                yesOption: "Pagar Manutenção (180 moedas)",
+                noOption: "Deixar para depois",
+                onYes: () => {
+                    if (gameState.gold >= 180) {
+                        gameState.gold -= 180;
+                        gameState.happiness += 5;
+                        playSound('upgrade');
+                        return { text: "Silos reformados! Suas estruturas agrícolas estão 100% livres de contaminação e ratos roedores.", isPositive: true };
+                    } else {
+                        return { text: "Ouro em mãos insuficiente para custear os carpinteiros do reino.", isPositive: false };
+                    }
                 },
-                noOutcome: (s) => { showToast("Desenvolvimento comunitário ignorado."); },
-                financialTip: "Incentivar modelos associativos e de cooperação mútua descentraliza o risco operacional e democratiza o acesso a capital básico."
+                onNo: () => {
+                    gameState.population -= 15;
+                    gameState.happiness -= 10;
+                    playSound('loss');
+                    return { text: "O trigo estragou. A escassez de farinha gerou alta inflação nos pães e reduziu o ânimo do povo faminto.", isPositive: false };
+                }
             },
             {
-                characterName: "Ourives David de Creta",
-                role: "Inovador de Custódia",
-                emoji: "💍",
-                dialogue: "Ofereço um novo serviço de cofre seguro para seus mercadores. Guardaremos o ouro deles e emitiremos recibos de custódia por 150g. Isso atrai +10 imigrantes felizes.",
-                yesOutcome: (s) => {
-                    s.gold -= 150;
-                    s.population += 10;
-                    s.happiness += 5;
-                    showToast("Serviço de custódia moderno lançado.");
+                id: 10,
+                character: "🧑‍🌾 Emissário do Povo Gael",
+                tag: "Gestão Fiscal",
+                description: "A alta cobrança de impostos no reino vizinho está afugentando dezenas de mercadores e mestres de obras de lá. Se aceitarmos recebê-los de braços abertos, eles elevarão nossa força de trabalho rapidamente.",
+                insight: "Ambientes regulatórios amigáveis atraem talentos qualificados, impulsionando a produtividade agregada do ecossistema.",
+                yesOption: "Dar as Boas-Vindas",
+                noOption: "Fechar as Fronteiras",
+                onYes: () => {
+                    gameState.population += 35;
+                    gameState.happiness += 5;
+                    playSound('upgrade');
+                    return { text: "Excelente acolhida! Dezenas de famílias de ferreiros imigraram para vosso território, prontas para preencherem vagas de trabalho ociosas.", isPositive: true };
                 },
-                noOutcome: (s) => { showToast("Sistemas monetários analógicos mantidos."); },
-                financialTip: "Serviços de custódia financeira e bancos primordiais reduzem o risco de roubos físicos de comerciantes, estimulando as rotas mercantis."
-            },
-            {
-                characterName: "Investidora Clara de Bardi",
-                role: "Corretora de Títulos Sênior",
-                emoji: "👩‍💼",
-                dialogue: "Majestade, ofereço Títulos de Tesouro Estrangeiros lastreados por 350g com juros de 6% ao ciclo garantidos para sempre! Deseja comprar este ativo líquido?",
-                yesOutcome: (s) => {
-                    s.gold -= 350;
-                    s.vaultGold += 350; // Alocado como poupança imune a roubos
-                    showToast("Títulos do tesouro internacional adquiridos!");
-                },
-                noOutcome: (s) => { showToast("Você preteriu diversificar moedas inativas."); },
-                financialTip: "Diversificar reservas em títulos governamentais soberanos estrangeiros dilui os riscos macroeconômicos do seu próprio território."
+                onNo: () => {
+                    return { text: "Fronteira mantida selada. Você manteve a demografia inalterada sem pressões em habitações.", isPositive: true };
+                }
             }
         ];
 
-        let petitionerQueue = [];
-        let currentPetitioner = null;
+        let activeCard = null;
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        function buildExhaustiveDeck() {
-            // Cria cópia profunda das cartas
-            let deck = uniqueDeck.map(card => ({ ...card }));
-            shuffleArray(deck);
-            return deck;
-        }
-
-        function startGame() {
-            playSound('success');
-            
-            const inputLeader = document.getElementById('input-leader-name').value.trim();
-            const inputKingdom = document.getElementById('input-kingdom-name').value.trim();
-            
-            state.playerName = inputLeader || "Rei Arthur";
-            state.kingdomName = inputKingdom || "Prosperis";
-            
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('game-container').classList.remove('hidden');
-            
-            // Inicializando variáveis padrões de balanço
-            state.gold = 800;
-            state.vaultGold = 100;
-            state.population = 100;
-            state.happiness = 80;
-            state.cycle = 1;
-            state.decisionsThisCycle = 0;
-            state.farms = 0;
-            state.tradeRoutes = 0;
-            state.mines = 0;
-            state.debt = 0;
-            state.maxGoldReached = 900;
-            
-            state.hasSchool = false;
-            state.hasHospital = false;
-            state.hasBorderPost = false;
-            state.hasWalls = false;
-            state.hasCropInsurance = false;
-            state.taxLevel = 'med';
-            
-            // Carrega baralho exaustivo sem repetições estruturais
-            petitionerQueue = buildExhaustiveDeck();
-            
-            document.getElementById('header-leader-title').innerText = state.playerName;
-            document.getElementById('header-kingdom-title').innerText = `Reino de ${state.kingdomName}`;
-            
-            renderState();
-            nextPetitioner();
-        }
-
-        function nextPetitioner() {
-            if (petitionerQueue.length === 0) {
-                // Caso o jogador sobreviva a dezenas de rodadas, remontamos o acervo com ordem alterada
-                petitionerQueue = buildExhaustiveDeck();
+        // GERAR PRÓXIMO EVENTO
+        function generateNextCard() {
+            // Se houver débito agendado
+            if (gameState.debt && gameState.debt > 0) {
+                const finalDebt = gameState.debt;
+                gameState.debt = 0;
+                
+                // Aplica desconto direto
+                gameState.gold -= finalDebt;
+                playSound('loss');
+                
+                showToast("Pagamento de Dívida", `Deduzido ${finalDebt} moedas para quitar o empréstimo com Lord Varis!`, "fa-receipt");
+                
+                if (gameState.gold < 0) {
+                    triggerGameOver("Sua tesouraria faliu ao tentar quitar a dívida pendente com Lord Varis.");
+                    return;
+                }
             }
 
-            currentPetitioner = petitionerQueue.pop();
-            
-            const card = document.getElementById('petitioner-card');
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(15px)';
+            // Seleciona um card aleatório do baralho fixo de qualidade
+            const randomIndex = Math.floor(Math.random() * eventCards.length);
+            activeCard = eventCards[randomIndex];
 
-            setTimeout(() => {
-                document.getElementById('petitioner-emoji').innerText = currentPetitioner.emoji;
-                document.getElementById('petitioner-role').innerText = currentPetitioner.role;
-                document.getElementById('petitioner-name').innerText = currentPetitioner.characterName;
-                document.getElementById('petitioner-dialogue').innerText = currentPetitioner.dialogue;
-                document.getElementById('education-tip').innerText = currentPetitioner.financialTip || "Equilibre suas finanças com sabedoria.";
-                document.getElementById('cycle-counter').innerText = `Decisão ${state.decisionsThisCycle + 1}/${state.maxDecisionsPerCycle}`;
+            // Renderiza na tela
+            document.getElementById('char-name').textContent = activeCard.character;
+            document.getElementById('event-tag').textContent = activeCard.tag;
+            document.getElementById('event-description').textContent = activeCard.description;
+            document.getElementById('lbl-financial-insight').textContent = activeCard.insight;
 
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 180);
+            document.getElementById('desc-option-yes').textContent = activeCard.yesOption;
+            document.getElementById('desc-option-no').textContent = activeCard.noOption;
+
+            // Avatares de acordo com personagem
+            const charAvatar = document.getElementById('char-avatar');
+            if (activeCard.character.includes("Alquimista")) charAvatar.textContent = "🧙‍♂️";
+            else if (activeCard.character.includes("Camponesa")) charAvatar.textContent = "🌾";
+            else if (activeCard.character.includes("Agiota")) charAvatar.textContent = "🏦";
+            else if (activeCard.character.includes("Cardeal")) charAvatar.textContent = "⛪";
+            else if (activeCard.character.includes("General")) charAvatar.textContent = "🗡️";
+            else if (activeCard.character.includes("Vendedor")) charAvatar.textContent = "🎩";
+            else if (activeCard.character.includes("Minerador")) charAvatar.textContent = "⛏️";
+            else if (activeCard.character.includes("Capitã")) charAvatar.textContent = "🚢";
+            else if (activeCard.character.includes("Auditor")) charAvatar.textContent = "📜";
+            else if (activeCard.character.includes("Emissário")) charAvatar.textContent = "🧑‍🌾";
+            else charAvatar.textContent = "👑";
         }
 
-        function handleDecision(isAccepted) {
-            if (!currentPetitioner) return;
+        // AÇÃO DE ESCOLHA (Aceitar / Recusar)
+        function makeChoice(isYes) {
+            if (!activeCard) return;
 
-            if (isAccepted) {
-                currentPetitioner.yesOutcome(state);
-                playSound('coin');
+            let result;
+            if (isYes) {
+                result = activeCard.onYes();
             } else {
-                currentPetitioner.noOutcome(state);
-                playSound('click');
+                result = activeCard.onNo();
             }
 
-            state.gold = Math.max(-1000, state.gold);
-            state.population = Math.max(5, state.population);
-            state.happiness = Math.min(100, Math.max(0, state.happiness));
+            if (result) {
+                // Se o resultado alterou status
+                if (result.stats) {
+                    if (result.stats.happiness) gameState.happiness += result.stats.happiness;
+                    if (result.stats.population) gameState.population += result.stats.population;
+                }
 
-            if (state.gold + state.vaultGold > state.maxGoldReached) {
-                state.maxGoldReached = state.gold + state.vaultGold;
+                // Modal personalizado de feedback da decisão
+                showFeedbackModal(activeCard.character, result.text, result.isPositive);
             }
 
-            state.decisionsThisCycle += 1;
-            renderState();
+            // Processar fim de ciclo (Turno)
+            processTurnCycle();
+        }
 
-            if (state.decisionsThisCycle >= state.maxDecisionsPerCycle) {
-                triggerWeeklyReport();
-            } else {
-                nextPetitioner();
+        // EXIBE RESULTADO DA ESCOLHA ANTES DE IR PRO PRÓXIMO
+        function showFeedbackModal(character, text, isPositive) {
+            showToast(character, text, isPositive ? "fa-thumbs-up text-emerald-400" : "fa-triangle-exclamation text-rose-400");
+        }
+
+        // ATUALIZAÇÃO GERAL DO BALANÇO DE TURNO
+        function processTurnCycle() {
+            gameState.cycle += 1;
+
+            // 1. Rendimento do Cofre (Juros Compostos de 3% sobre a poupança acumulada)
+            if (gameState.savings > 0) {
+                const interest = Math.floor(gameState.savings * 0.03);
+                gameState.savings += interest;
+                playSound('coins');
             }
-        }
 
-        function getRequiredWorkers() {
-            return Math.floor((state.farms * 5) + (state.tradeRoutes * 2) + (state.mines * 12));
-        }
-
-        function getLaborEfficiency() {
-            const required = getRequiredWorkers();
-            if (required === 0) return 1.0;
-            const ratio = state.population / required;
-            return Math.min(1.0, ratio);
-        }
-
-        function getFinanceMetrics() {
-            let taxMultiplier = 0.5;
-            if (state.taxLevel === 'low') taxMultiplier = 0.22;
-            else if (state.taxLevel === 'high') taxMultiplier = 0.95;
-
-            const taxesBase = Math.floor(state.population * taxMultiplier);
-            const taxes = Math.floor(taxesBase * (state.happiness / 100));
-
-            const laborEff = getLaborEfficiency();
-            const farmIncome = state.farms * 15;
-            const routeIncome = state.tradeRoutes * 40;
-            const mineIncome = state.mines * 70;
+            // 2. Cálculo de Demanda de Força de Trabalho
+            const requiredJobs = (gameState.assets.farm * 10) + (gameState.assets.route * 25) + (gameState.assets.mine * 50);
             
-            let basePassive = farmIncome + routeIncome + mineIncome;
-            let efficiencyMultiplier = 1;
-            if (state.hasSchool) efficiencyMultiplier += 0.15;
+            // Fator de eficiência de produção (se faltar cidadãos para as vagas, as receitas encolhem)
+            let efficiency = 1.0;
+            if (requiredJobs > 0 && gameState.population < requiredJobs) {
+                efficiency = gameState.population / requiredJobs;
+                showToast("Falta de Trabalhadores", "Seus negócios perderam produtividade por falta de cidadãos ativos!", "fa-circle-xmark");
+            }
 
-            const passiveIncome = Math.floor(basePassive * laborEff * efficiencyMultiplier);
-            const vaultInterest = Math.floor(state.vaultGold * state.vaultInterestRate);
-            const operationCosts = 20 + (state.farms * 2) + (state.mines * 6);
-            const debtInterest = Math.floor(state.debt * state.interestRate);
+            // 3. Receita dos Ativos com base em Eficiência de Mão de Obra e Upgrades
+            let rawAssetIncome = (gameState.assets.farm * 15) + (gameState.assets.route * 45) + (gameState.assets.mine * 110);
+            
+            // Upgrade da escola de ofícios adiciona +15% de produtividade
+            if (gameState.upgrades.school) {
+                rawAssetIncome = rawAssetIncome * 1.15;
+            }
 
-            const netRevenue = (taxes + passiveIncome + vaultInterest) - (operationCosts + debtInterest);
+            const totalAssetIncome = Math.floor(rawAssetIncome * efficiency);
 
-            return {
-                taxes,
-                passiveIncome,
-                vaultInterest,
-                expenses: operationCosts,
-                interest: debtInterest,
-                net: netRevenue
-            };
+            // 4. Receita de Impostos Baseados em População, Felicidade e Alíquota Selecionada
+            let taxMultiplier = 0.20; // Médio padrão
+            if (gameState.taxRate === "low") taxMultiplier = 0.10;
+            if (gameState.taxRate === "high") taxMultiplier = 0.35;
+
+            // Imposto é proporcional à felicidade da população para simular realidade
+            const happinessFactor = gameState.happiness / 100;
+            const taxRevenue = Math.floor(gameState.population * taxMultiplier * happinessFactor);
+
+            // Adiciona valores à carteira líquida
+            gameState.gold += (totalAssetIncome + taxRevenue);
+
+            // 5. Crescimento Populacional Orgânico e Migração (Influenciado pela Taxa de Imposto e Felicidade)
+            let popGrowthRate = 0.03; // Base
+            if (gameState.taxRate === "low") popGrowthRate += 0.04; // Imposto baixo atrai famílias
+            if (gameState.taxRate === "high") popGrowthRate -= 0.05; // Imposto alto provoca debandada
+
+            if (gameState.happiness < 40) popGrowthRate -= 0.04;
+            if (gameState.happiness > 80) popGrowthRate += 0.02;
+
+            const popDelta = Math.floor(gameState.population * popGrowthRate);
+            gameState.population += popDelta;
+
+            // Garante mínimo de população
+            if (gameState.population < 10) gameState.population = 10;
+
+            // 6. Impacto de Pestes Sazonais (Sem Hospital Real há 15% de chances de perder cidadãos)
+            if (!gameState.upgrades.hospital && Math.random() < 0.15 && gameState.cycle > 5) {
+                const pestLoss = Math.floor(gameState.population * 0.15);
+                gameState.population -= pestLoss;
+                gameState.happiness -= 10;
+                playSound('loss');
+                showToast("Peste Negra", `Uma praga assolou o feudo! Perdemos ${pestLoss} cidadãos por falta de saneamento hospitalar.`, "fa-virus");
+            }
+
+            // Limites de Segurança da Felicidade
+            if (gameState.happiness > 100) gameState.happiness = 100;
+            if (gameState.happiness < 0) gameState.happiness = 0;
+
+            // Validação de Falência (Game Over)
+            if (gameState.gold < 0) {
+                triggerGameOver("Seu reino entrou em saldo de caixa negativo severo e o povo rebelou-se contra a dinastia.");
+                return;
+            }
+
+            // Atualização de UI e envio automático do Save para a Nuvem Ably
+            updateUI();
+            saveGameToCloud();
+            generateNextCard();
         }
 
+        // COMPRAR ATIVO DE RENDA PASSIVA MANUALMENTE
         function buyAsset(type) {
-            const price = shopPrices[type];
-            if (state.gold < price) {
-                playSound('error');
-                showToast("Ouro líquido insuficiente em caixa livre!");
-                return;
+            playSound('click');
+            let cost = 0;
+            if (type === 'farm') cost = 250;
+            if (type === 'route') cost = 600;
+            if (type === 'mine') cost = 1200;
+
+            if (gameState.gold >= cost) {
+                gameState.gold -= cost;
+                gameState.assets[type] += 1;
+                playSound('coins');
+                showToast("Ativo Adquirido", `Seu reino agora possui um novo ativo de renda passiva!`, "fa-store");
+                updateUI();
+                saveGameToCloud();
+            } else {
+                showToast("Erro de Compra", "Não possuímos moedas suficientes na carteira líquida para esta compra.", "fa-triangle-exclamation");
             }
-
-            state.gold -= price;
-            if (type === 'farm') state.farms += 1;
-            else if (type === 'route') state.tradeRoutes += 1;
-            else if (type === 'mine') state.mines += 1;
-
-            playSound('coin');
-            showToast(`Ativo Adquirido: ${type === 'farm' ? 'Fazenda' : type === 'route' ? 'Rota' : 'Mina'}`);
-            renderState();
         }
 
+        // ADQUIRIR UPGRADES E MELHORIAS ESTRUTURAIS
         function buyUpgrade(type) {
-            if (type === 'festival') {
-                if (state.gold < upgradePrices.festival) {
-                    playSound('error');
-                    showToast("Ouro insuficiente em caixa livre!");
-                    return;
-                }
-                state.gold -= upgradePrices.festival;
-                state.happiness = Math.min(100, state.happiness + 20);
-                playSound('success');
-                showToast("🎉 Festival popular realizado com sucesso!");
-                renderState();
+            playSound('click');
+            if (gameState.upgrades[type]) {
+                showToast("Melhoria Ativa", "Este avanço estrutural já está integrado e em funcionamento no reino.", "fa-info");
                 return;
             }
 
-            if (type === 'school' && state.hasSchool) return;
-            if (type === 'hospital' && state.hasHospital) return;
-            if (type === 'border' && state.hasBorderPost) return;
-            if (type === 'walls' && state.hasWalls) return;
+            let cost = 0;
+            if (type === 'school') cost = 500;
+            if (type === 'hospital') cost = 800;
+            if (type === 'muralha') cost = 1000;
 
-            const price = upgradePrices[type];
-            if (state.gold < price) {
-                playSound('error');
-                showToast("Ouro líquido insuficiente para melhoria!");
+            if (gameState.gold >= cost) {
+                gameState.gold -= cost;
+                gameState.upgrades[type] = true;
+                playSound('upgrade');
+                showToast("Avanço Estrutural", "Seu reino deu um salto qualitativo de gestão de infraestrutura!", "fa-chart-line");
+                updateUI();
+                saveGameToCloud();
+            } else {
+                showToast("Fundos Insuficientes", "Não há moedas disponíveis livres para custear esta melhoria social.", "fa-triangle-exclamation");
+            }
+        }
+
+        // REALIZAR FESTIVAL REAL
+        function triggerFestival() {
+            playSound('click');
+            if (gameState.gold >= 200) {
+                gameState.gold -= 200;
+                gameState.happiness += 25;
+                if (gameState.happiness > 100) gameState.happiness = 100;
+                playSound('coins');
+                showToast("Festejo Popular", "Os menestréis e banquetes elevaram o ânimo nacional em +25%!", "fa-face-laugh-beam");
+                updateUI();
+                saveGameToCloud();
+            } else {
+                showToast("Aviso do Tesouro", "Falta liquidez em caixa para pagar banquetes de luxo neste momento.", "fa-triangle-exclamation");
+            }
+        }
+
+        // ALTERAR TAXA DE IMPOSTO REAL
+        function changeTaxRate() {
+            playSound('click');
+            gameState.taxRate = document.getElementById('tax-select').value;
+            showToast("Política Fiscal", `Alíquota fiscal ajustada com sucesso! Impacto refletirá no próximo ciclo.`, "fa-percent");
+            updateUI();
+            saveGameToCloud();
+        }
+
+        // ATUALIZAÇÃO DA TELA (RELAÇÃO DE ELEMENTOS)
+        function updateUI() {
+            // Header e Status
+            document.getElementById('header-gold').textContent = `${gameState.gold.toLocaleString()} moedas`;
+            document.getElementById('header-pop').textContent = gameState.population.toLocaleString();
+
+            // Balanço Real
+            document.getElementById('lbl-gold').textContent = gameState.gold.toLocaleString();
+            document.getElementById('lbl-savings').textContent = gameState.savings.toLocaleString();
+            document.getElementById('lbl-population').textContent = gameState.population.toLocaleString();
+            document.getElementById('lbl-happiness').textContent = `${gameState.happiness}%`;
+
+            // Turno atual
+            document.getElementById('lbl-cycle').textContent = `Turno ${gameState.cycle}`;
+
+            // Contadores de Ativos
+            document.getElementById('count-farms').textContent = `(${gameState.assets.farm})`;
+            document.getElementById('count-routes').textContent = `(${gameState.assets.route})`;
+            document.getElementById('count-mines').textContent = `(${gameState.assets.mine})`;
+
+            // Total de Vagas vs Demanda
+            const totalRequiredJobs = (gameState.assets.farm * 10) + (gameState.assets.route * 25) + (gameState.assets.mine * 50);
+            document.getElementById('lbl-jobs').textContent = `${gameState.population.toLocaleString()} / ${totalRequiredJobs.toLocaleString()}`;
+
+            // Atualização visual dos botões de upgrades já adquiridos
+            if (gameState.upgrades.school) {
+                document.getElementById('btn-upgrade-school').className = "bg-slate-900 border border-emerald-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2 opacity-60";
+                document.getElementById('lbl-price-school').textContent = "Ativo (Adquirido)";
+            }
+            if (gameState.upgrades.hospital) {
+                document.getElementById('btn-upgrade-hospital').className = "bg-slate-900 border border-emerald-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2 opacity-60";
+                document.getElementById('lbl-price-hospital').textContent = "Ativo (Adquirido)";
+            }
+            if (gameState.upgrades.muralha) {
+                document.getElementById('btn-upgrade-muralha').className = "bg-slate-900 border border-emerald-500/40 p-3 rounded-xl text-left transition flex flex-col gap-2 opacity-60";
+                document.getElementById('lbl-price-muralha').textContent = "Ativo (Adquirido)";
+            }
+
+            // Seleção de Taxa Correta
+            document.getElementById('tax-select').value = gameState.taxRate;
+        }
+
+        // SISTEMA DE DEPÓSITO E SAQUE DO COFRE REAL
+        let currentSavingsAction = 'deposit';
+
+        function openSavingsModal(action) {
+            playSound('click');
+            currentSavingsAction = action;
+            const modal = document.getElementById('savings-modal');
+            const title = document.getElementById('savings-modal-title');
+            const maxLabel = document.getElementById('lbl-max-savings');
+            const confirmBtn = document.getElementById('btn-confirm-savings');
+
+            modal.classList.remove('hidden');
+            document.getElementById('savings-amount').value = '';
+
+            if (action === 'deposit') {
+                title.textContent = "Depositar no Cofre (Poupança Real)";
+                maxLabel.textContent = `Disponível em Caixa: ${gameState.gold.toLocaleString()} moedas`;
+                confirmBtn.onclick = executeSavingsAction;
+            } else {
+                title.textContent = "Sacar Recursos do Cofre";
+                maxLabel.textContent = `Disponível no Cofre: ${gameState.savings.toLocaleString()} moedas`;
+                confirmBtn.onclick = executeSavingsAction;
+            }
+        }
+
+        function closeSavingsModal() {
+            playSound('click');
+            document.getElementById('savings-modal').classList.add('hidden');
+        }
+
+        function executeSavingsAction() {
+            const amount = parseInt(document.getElementById('savings-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Erro", "Insira uma quantidade de ouro válida para transacionar.", "fa-circle-xmark");
                 return;
             }
 
-            state.gold -= price;
-            if (type === 'school') state.hasSchool = true;
-            else if (type === 'hospital') state.hasHospital = true;
-            else if (type === 'border') state.hasBorderPost = true;
-            else if (type === 'walls') state.hasWalls = true;
-
-            playSound('success');
-            showToast(`Melhoria estrutural construída!`);
-            renderState();
-        }
-
-        function setTaxLevel(level) {
-            state.taxLevel = level;
-            const desc = document.getElementById('tax-influence-desc');
-            
-            document.getElementById('tax-btn-low').className = "py-1 text-center text-[11px] rounded bg-slate-900 hover:bg-slate-800 cursor-pointer";
-            document.getElementById('tax-btn-med').className = "py-1 text-center text-[11px] rounded bg-slate-900 hover:bg-slate-800 cursor-pointer";
-            document.getElementById('tax-btn-high').className = "py-1 text-center text-[11px] rounded bg-slate-900 hover:bg-slate-800 cursor-pointer";
-
-            if (level === 'low') {
-                document.getElementById('tax-btn-low').className = "py-1 text-center text-[11px] rounded bg-emerald-500 text-slate-950 font-bold cursor-pointer";
-                desc.innerText = "Imposto Leve: Eleva a felicidade (+4% por ciclo) e atrai imigração externa em massa.";
-            } else if (level === 'med') {
-                document.getElementById('tax-btn-med').className = "py-1 text-center text-[11px] rounded bg-amber-500 text-slate-950 font-bold cursor-pointer";
-                desc.innerText = "Imposto Médio: Estabiliza a aprovação popular e garante imigração natural e constante.";
-            } else {
-                document.getElementById('tax-btn-high').className = "py-1 text-center text-[11px] rounded bg-rose-500 text-slate-950 font-bold cursor-pointer";
-                desc.innerText = "Imposto Elevado: Reduz drasticamente a aprovação popular (-8% por ciclo) e causa fuga de trabalhadores.";
-            }
-
-            playSound('click');
-            renderState();
-        }
-
-        function switchTab(tab) {
-            document.getElementById('tab-content-assets').classList.add('hidden');
-            document.getElementById('tab-content-upgrades').classList.add('hidden');
-            document.getElementById('tab-content-demo').classList.add('hidden');
-
-            document.getElementById('tab-btn-assets').className = "flex-1 pb-2 border-b-2 border-transparent text-slate-400 font-bold text-xs text-center cursor-pointer";
-            document.getElementById('tab-btn-upgrades').className = "flex-1 pb-2 border-b-2 border-transparent text-slate-400 font-bold text-xs text-center cursor-pointer";
-            document.getElementById('tab-btn-demo').className = "flex-1 pb-2 border-b-2 border-transparent text-slate-400 font-bold text-xs text-center cursor-pointer";
-
-            if (tab === 'assets') {
-                document.getElementById('tab-content-assets').classList.remove('hidden');
-                document.getElementById('tab-btn-assets').className = "flex-1 pb-2 border-b-2 border-amber-500 text-amber-500 font-bold text-xs text-center cursor-pointer";
-            } else if (tab === 'upgrades') {
-                document.getElementById('tab-content-upgrades').classList.remove('hidden');
-                document.getElementById('tab-btn-upgrades').className = "flex-1 pb-2 border-b-2 border-amber-500 text-amber-500 font-bold text-xs text-center cursor-pointer";
-            } else {
-                document.getElementById('tab-content-demo').classList.remove('hidden');
-                document.getElementById('tab-btn-demo').className = "flex-1 pb-2 border-b-2 border-amber-500 text-amber-500 font-bold text-xs text-center cursor-pointer";
-            }
-            playSound('click');
-        }
-
-        function renderState() {
-            document.getElementById('stat-gold').innerText = state.gold;
-            document.getElementById('stat-population').innerText = state.population;
-            document.getElementById('stat-happiness').innerText = state.happiness + "%";
-
-            const m = getFinanceMetrics();
-            document.getElementById('finance-taxes').innerText = `+${m.taxes}`;
-            document.getElementById('finance-passive').innerText = `+${m.passiveIncome}`;
-            document.getElementById('finance-vault-interest').innerText = `+${m.vaultInterest}`;
-            document.getElementById('finance-expenses').innerText = `-${m.expenses}`;
-            document.getElementById('finance-interest').innerText = m.interest > 0 ? `-${m.interest}` : "0";
-
-            const netEl = document.getElementById('finance-net');
-            netEl.innerText = (m.net >= 0 ? "+" : "") + m.net;
-            netEl.className = m.net >= 0 ? "font-bold text-emerald-400" : "font-bold text-rose-500";
-
-            document.getElementById('inventory-farms').innerText = Math.floor(state.farms);
-            document.getElementById('inventory-routes').innerText = state.tradeRoutes;
-            document.getElementById('inventory-mines').innerText = state.mines;
-            document.getElementById('vault-gold-amount').innerText = state.vaultGold;
-            document.getElementById('debt-amount').innerText = state.debt;
-
-            const req = getRequiredWorkers();
-            const eff = getLaborEfficiency();
-            document.getElementById('demo-total-pop').innerText = state.population;
-            document.getElementById('demo-req-workers').innerText = req;
-            document.getElementById('demo-work-efficiency').innerText = `${Math.floor(eff * 100)}%`;
-
-            const payBtn = document.getElementById('pay-debt-btn');
-            if (state.debt > 0) payBtn.classList.remove('hidden');
-            else payBtn.classList.add('hidden');
-
-            updateUpgradeButtonState('school', state.hasSchool);
-            updateUpgradeButtonState('hospital', state.hasHospital);
-            updateUpgradeButtonState('border', state.hasBorderPost);
-            updateUpgradeButtonState('walls', state.hasWalls);
-
-            if (state.happiness <= 0) {
-                triggerGameOver("rebellion");
-            } else if (state.gold <= -600) {
-                triggerGameOver("bankruptcy");
-            }
-        }
-
-        function updateUpgradeButtonState(id, stateValue) {
-            // Garante que o ID mapeia perfeitamente para o HTML
-            const htmlId = id === 'walls' ? 'btn-upgrade-muralha' : `btn-upgrade-${id}`;
-            const el = document.getElementById(htmlId);
-            if (!el) return;
-
-            if (stateValue) {
-                el.innerText = "Adquirido ✔";
-                el.className = "py-1 px-2.5 bg-slate-800 text-emerald-450 font-bold text-[10px] rounded-lg cursor-not-allowed";
-            } else {
-                el.innerText = `Comprar (${upgradePrices[id]}g)`;
-                el.className = state.gold >= upgradePrices[id]
-                    ? "py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg cursor-pointer"
-                    : "py-1 px-2.5 bg-slate-800 text-slate-500 font-bold text-[10px] rounded-lg cursor-not-allowed";
-            }
-        }
-
-        function payDebt() {
-            if (state.debt <= 0) return;
-            if (state.gold >= state.debt) {
-                state.gold -= state.debt;
-                state.debt = 0;
-                playSound('success');
-                showToast("Dívida quitada integralmente!");
-            } else {
-                state.debt -= state.gold;
-                state.gold = 0;
-                playSound('coin');
-                showToast("Amortização parcial efetuada.");
-            }
-            renderState();
-        }
-
-        let vaultMode = 'deposit';
-
-        function openVaultModal(mode) {
-            vaultMode = mode;
-            document.getElementById('vault-modal-title').innerText = mode === 'deposit' ? "Depositar no Cofre" : "Sacar do Cofre";
-            document.getElementById('vault-modal-cash').innerText = state.gold;
-            document.getElementById('vault-modal-savings').innerText = state.vaultGold;
-            document.getElementById('vault-input-amount').value = "";
-            
-            const confirmBtn = document.getElementById('vault-action-btn');
-            confirmBtn.onclick = executeVaultTransaction;
-
-            document.getElementById('vault-modal').classList.remove('hidden');
-        }
-
-        function closeVaultModal() {
-            document.getElementById('vault-modal').classList.add('hidden');
-        }
-
-        function executeVaultTransaction() {
-            const inputVal = parseInt(document.getElementById('vault-input-amount').value);
-            if (isNaN(inputVal) || inputVal <= 0) {
-                playSound('error');
-                showToast("Insira uma quantia monetária válida!");
-                return;
-            }
-
-            if (vaultMode === 'deposit') {
-                if (state.gold < inputVal) {
-                    playSound('error');
-                    showToast("Saldo de caixa livre insuficiente!");
+            if (currentSavingsAction === 'deposit') {
+                if (gameState.gold >= amount) {
+                    gameState.gold -= amount;
+                    gameState.savings += amount;
+                    playSound('coins');
+                    showToast("Cofre Real", `Você depositou ${amount} moedas no fundo de rendimentos!`, "fa-vault");
+                } else {
+                    showToast("Saldo Insuficiente", "Você não possui essa quantidade de moedas líquidas em mãos.", "fa-circle-xmark");
                     return;
                 }
-                state.gold -= inputVal;
-                state.vaultGold += inputVal;
-                playSound('success');
-                showToast(`Sucesso: depositado ${inputVal}g no Cofre.`);
             } else {
-                if (state.vaultGold < inputVal) {
-                    playSound('error');
-                    showToast("Reserva do Cofre insuficiente para o saque!");
+                if (gameState.savings >= amount) {
+                    gameState.savings -= amount;
+                    gameState.gold += amount;
+                    playSound('coins');
+                    showToast("Cofre Real", `Você retirou ${amount} moedas do fundo para uso livre imediato!`, "fa-vault");
+                } else {
+                    showToast("Saldo Insuficiente", "Não há moedas suficientes depositadas no cofre para este saque.", "fa-circle-xmark");
                     return;
                 }
-                state.vaultGold -= inputVal;
-                state.gold += inputVal;
-                playSound('coin');
-                showToast(`Sucesso: sacado ${inputVal}g para o caixa livre.`);
             }
 
-            closeVaultModal();
-            renderState();
+            closeSavingsModal();
+            updateUI();
+            saveGameToCloud();
         }
 
-        function triggerWeeklyReport() {
-            playSound('success');
-            const m = getFinanceMetrics();
-
-            // Atualização de saldos soberanos
-            state.gold += m.net;
-            state.vaultGold += m.vaultInterest; 
-
-            // Atualização populacional baseada na política tributária
-            let demographyTrend = 0;
-            if (state.taxLevel === 'low') {
-                state.happiness = Math.min(100, state.happiness + 4);
-                demographyTrend = Math.floor(state.population * 0.05) + 2; 
-            } else if (state.taxLevel === 'med') {
-                demographyTrend = Math.floor(state.population * 0.01) + 1;
-            } else {
-                state.happiness = Math.max(0, state.happiness - 8);
-                demographyTrend = -Math.floor(state.population * 0.06) - 1;
-            }
-
-            if (state.hasBorderPost && demographyTrend >= 0) {
-                demographyTrend += 3;
-            }
-
-            state.population = Math.max(5, state.population + demographyTrend);
-
-            // Mecanismo de eventos e intempéries climáticas críticas
-            let reportTip = "";
-            const randomEvent = Math.random();
-
-            if (randomEvent < 0.12) {
-                if (state.hasCropInsurance) {
-                    reportTip = "⚠️ Uma seca violenta castigou as plantações do sul, mas sua apólice agrícola ativa indenizou os fazendeiros integralmente!";
-                    state.hasCropInsurance = false;
-                } else {
-                    const loss = Math.floor(state.farms * 18 + 25);
-                    state.gold -= loss;
-                    state.happiness = Math.max(0, state.happiness - 10);
-                    reportTip = `⚠️ Intempérie climática severa! Sem apólice de seguros ativa, os canais de irrigação secaram e causaram um prejuízo direto de ${loss}g.`;
-                }
-            } else if (randomEvent > 0.88) {
-                if (state.hasWalls) {
-                    reportTip = "🛡️ Bandoleiros nômades tentaram invadir o tesouro real, mas colidiram contra suas Muralhas de Aço!";
-                } else {
-                    const stolen = Math.floor(state.gold * 0.15);
-                    if (stolen > 0) {
-                        state.gold -= stolen;
-                        reportTip = `💸 Saqueadores assaltaram as reservas em caixa e furtaram ${stolen}g devido à falta de muralhas de proteção.`;
-                    } else {
-                        reportTip = "O ciclo encerrou em plena calmaria civil.";
-                    }
-                }
-            } else if (randomEvent > 0.42 && randomEvent < 0.50) {
-                if (state.hasHospital) {
-                    reportTip = "🏥 Surtos de febre tifoide ameaçaram as frentes de trabalho, mas o Hospital Real curou os enfermos a tempo!";
-                } else {
-                    const deaths = Math.floor(state.population * 0.15) + 3;
-                    state.population = Math.max(5, state.population - deaths);
-                    state.happiness = Math.max(0, state.happiness - 15);
-                    reportTip = `🤢 Surto epidêmico! Sem hospital central estruturado no reino, ${deaths} servos morreram e a produtividade desabou.`;
-                }
-            } else {
-                if (state.vaultGold > 200) {
-                    reportTip = `A sua Reserva de Emergência no Cofre gerou +${m.vaultInterest}g em juros compostos garantidos sem nenhum imposto ou esforço!`;
-                } else {
-                    reportTip = "Dica de Auditoria: Procure guardar parte substancial de sua receita tributária líquida no cofre de poupança sob forma de Reserva.";
-                }
-            }
-
-            document.getElementById('report-turn').innerText = `Auditoria de Rendimentos - Turno ${state.cycle}`;
-            document.getElementById('report-taxes').innerText = `+${m.taxes}`;
-            document.getElementById('report-assets').innerText = `+${m.passiveIncome}`;
-            document.getElementById('report-vault-yield').innerText = `+${m.vaultInterest}`;
-            document.getElementById('report-expenses').innerText = `-${m.expenses}`;
-            document.getElementById('report-interest').innerText = m.interest > 0 ? `-${m.interest}` : "0";
-            
-            const repNet = document.getElementById('report-net');
-            repNet.innerText = (m.net >= 0 ? "+" : "") + m.net;
-            repNet.className = m.net >= 0 ? "font-bold text-emerald-400" : "font-bold text-rose-500";
-            document.getElementById('report-tip').innerText = reportTip;
-
-            document.getElementById('report-modal').classList.remove('hidden');
-        }
-
-        function closeReportModal() {
-            document.getElementById('report-modal').classList.add('hidden');
-            state.cycle += 1;
-            state.decisionsThisCycle = 0;
-            renderState();
-            nextPetitioner();
-        }
-
-        function openGuideModal() {
-            document.getElementById('guide-modal').classList.remove('hidden');
-            switchGuideTab('g-basics');
-            playSound('click');
-        }
-
-        function closeGuideModal() {
-            document.getElementById('guide-modal').classList.add('hidden');
-            playSound('click');
-        }
-
-        function switchGuideTab(tab) {
-            document.getElementById('g-content-basics').classList.add('hidden');
-            document.getElementById('g-content-assets').classList.add('hidden');
-            document.getElementById('g-content-comp').classList.add('hidden');
-            document.getElementById('g-content-risk').classList.add('hidden');
-
-            document.getElementById('g-tab-basics').className = "pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer";
-            document.getElementById('g-tab-assets').className = "pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer";
-            document.getElementById('g-tab-comp').className = "pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer";
-            document.getElementById('g-tab-risk').className = "pb-1 px-3 border-b-2 border-transparent text-slate-400 font-bold text-xs shrink-0 cursor-pointer";
-
-            if (tab === 'g-basics') {
-                document.getElementById('g-content-basics').classList.remove('hidden');
-                document.getElementById('g-tab-basics').className = "pb-1 px-3 border-b-2 border-amber-500 text-amber-500 font-bold text-xs shrink-0 cursor-pointer";
-            } else if (tab === 'g-assets') {
-                document.getElementById('g-content-assets').classList.remove('hidden');
-                document.getElementById('g-tab-assets').className = "pb-1 px-3 border-b-2 border-amber-500 text-amber-500 font-bold text-xs shrink-0 cursor-pointer";
-            } else if (tab === 'g-comp') {
-                document.getElementById('g-content-comp').classList.remove('hidden');
-                document.getElementById('g-tab-comp').className = "pb-1 px-3 border-b-2 border-amber-500 text-amber-500 font-bold text-xs shrink-0 cursor-pointer";
-            } else {
-                document.getElementById('g-content-risk').classList.remove('hidden');
-                document.getElementById('g-tab-risk').className = "pb-1 px-3 border-b-2 border-amber-500 text-amber-500 font-bold text-xs shrink-0 cursor-pointer";
-            }
-            playSound('click');
-        }
-
+        // EVENTOS DE GAME OVER / FALÊNCIA
         function triggerGameOver(reason) {
-            playSound('error');
-            document.getElementById('end-cycles').innerText = state.cycle;
-            document.getElementById('end-vault').innerText = state.vaultGold;
-            document.getElementById('end-debt').innerText = state.debt;
-            document.getElementById('end-pop').innerText = state.population;
+            playSound('loss');
+            document.getElementById('gameover-reason').textContent = reason;
+            document.getElementById('end-cycles').textContent = gameState.cycle;
+            
+            const totalAssets = gameState.assets.farm + gameState.assets.route + gameState.assets.mine;
+            document.getElementById('end-assets').textContent = totalAssets;
+            document.getElementById('end-pop').textContent = gameState.population.toLocaleString();
 
-            let title = "";
-            let feedback = "";
-            let icon = "💀";
-            let rank = "";
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
 
-            if (reason === "rebellion") {
-                icon = "🔥";
-                title = "O Povo se Rebelou!";
-                rank = "Déspota Extrativista";
-                feedback = `Sua gestão sobre o Reino de ${state.kingdomName} optou por focar excessivamente na drenagem imediata de capital humano via impostos altíssimos. Isso gerou revolta social e fuga de servos, colapsando suas minas e rotas por falta de mão de obra. Na economia, manter a estabilidade social e o bem-estar dos agentes produtivos é a base de qualquer ciclo financeiro sustentável.`;
-            } else if (reason === "bankruptcy") {
-                icon = "💸";
-                title = "Insolvência Absoluta!";
-                rank = "Monarca Falido";
-                feedback = `O cofre soberano do Reino de ${state.kingdomName} entrou em colapso devido ao acúmulo descontrolado de empréstimos, taxas e passivos financeiros caros. Você aprendeu na pele que juros compostos negativos agem de forma devastadora. Nunca financie passivos de consumo que gerem taxas maiores do que o fluxo de caixa de seus ativos.`;
+        // RESET DO JOGO E RESTAURAR VALORES DE FÁBRICA
+        function restartGame() {
+            playSound('click');
+            gameState.cycle = 1;
+            gameState.gold = 1000;
+            gameState.savings = 0;
+            gameState.population = 150;
+            gameState.happiness = 85;
+            gameState.taxRate = "medium";
+            gameState.assets = { farm: 0, route: 0, mine: 0 };
+            gameState.upgrades = { school: false, hospital: false, muralha: false };
+            gameState.debt = 0;
+
+            document.getElementById('gameover-modal').classList.add('hidden');
+            
+            updateUI();
+            saveGameToCloud();
+            generateNextCard();
+        }
+
+        // LISTENER DE SUBMIT DA TELA INICIAL
+        document.getElementById('start-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            playSound('click');
+            
+            const usernameInput = document.getElementById('cloud-username').value.trim();
+            const passwordInput = document.getElementById('cloud-password').value.trim();
+
+            if (!usernameInput || !passwordInput) {
+                showToast("Campos Vazios", "Por favor, digite seu usuário e senha para salvar na nuvem Ably.", "fa-circle-xmark");
+                return;
             }
 
-            document.getElementById('game-over-icon').innerText = icon;
-            document.getElementById('game-over-title').innerText = title;
-            document.getElementById('game-over-rank').innerText = rank;
-            document.getElementById('game-over-feedback').innerText = feedback;
-
-            document.getElementById('game-over-modal').classList.remove('hidden');
-        }
-
-        function openConfirmModal() {
-            document.getElementById('confirm-modal').classList.remove('hidden');
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirm-modal').classList.add('hidden');
-        }
-
-        function confirmRestart() {
-            closeConfirmModal();
-            document.getElementById('game-over-modal').classList.add('hidden');
-            document.getElementById('game-container').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
-        }
-
-        function restartGame() {
-            document.getElementById('game-over-modal').classList.add('hidden');
-            startGame();
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast-notification');
-            document.getElementById('toast-text').innerText = message;
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-10px)';
-            }, 3000);
-        }
+            initializeAbly(usernameInput, passwordInput);
+        });
     </script>
 </body>
 </html>
